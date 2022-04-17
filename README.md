@@ -1,4 +1,4 @@
-# GeoNet_2021
+# GeoNet_2022
 
 GeoNet analyzes stream networks to detect statistically significant
 changes between background and potentially impacted sites.
