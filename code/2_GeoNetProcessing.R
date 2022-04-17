@@ -408,12 +408,6 @@ nrow(df_polluter_processed)
  }else{
      ## Getting the flow dist from list for polluters
      flow_dist_from_list_polluters<-list()
-     ## for (index in 1:nrow(df_polluter_nodeID_aggregated)){
-     ##     flow_dist_from_list_polluters[[index]] <- wrapper_flow_dist_cal(df_polluter=df_polluter_nodeID_aggregated,anpoll_edgelist = anpoll_edgelist, shortest_path_anpoll_edgelist = shortest_path_anpoll_edgelist, total_edgelist_character_modified = total_edgelist_character_modified, from_indicator = T, to_indicator = F, file_path = file_path)
-     ## }
-     ## index <- 1401
-     ## debug(wrapper_flow_dist_cal)
-     ## temp <- wrapper_flow_dist_cal(df_polluter=df_polluter_nodeID_aggregated,anpoll_edgelist = anpoll_edgelist, shortest_path_anpoll_edgelist = shortest_path_anpoll_edgelist, total_edgelist_character_modified = total_edgelist_character_modified, from_indicator = T, to_indicator = F, flow_type = "flow_from", file_path = file_path)
 
      ## ptm <- proc.time()
      print("From_list_polluter started")
@@ -447,16 +441,6 @@ nrow(df_polluter_processed)
      df_projected_nodeIDs<-data.frame("nodeID"=projected_nodeIDs_vec,stringsAsFactors = F)
      flow_dist_from_list_projected<-list()
 
-     ## flow_dist_from_list_projected  <- vector(mode="list", length = length(projected_nodeIDs_vec))
-     ## index <- 4
-     ## flow_dist_from_list_projected[1]  <- wrapper_flow_dist_cal(df_polluter=df_projected_nodeIDs,
-     ##                           anpoll_edgelist = anpoll_edgelist,
-     ##                           shortest_path_anpoll_edgelist = shortest_path_anpoll_edgelist,
-     ##                           total_edgelist_character_modified = total_edgelist_character_modified,
-     ##                           from_indicator = T, to_indicator = F,
-     ##                           flow_type = "flow_projected",
-     ##                           file_path = file_path)
-
      # cl <- makeCluster(50)
      # registerDoParallel(cl)
 
@@ -479,19 +463,6 @@ nrow(df_polluter_processed)
      save(flow_dist_from_list_projected,
           file = paste0(file_path,"inference/flow_dist_from_list_projected.RData"))
 
-     ## ## Initializing the combined list
-     ## flow_dist_from_list_projected_combined<-list()
-     ## ## for (i in 1:100){
-     ## ##     load(file = paste0(file_path,"inference/projected_results/flow_dist_from_list_projected_",i,".RData"))
-     ## ##     flow_dist_from_list_projected_combined[[i]]<-flow_dist_from_list_projected
-     ## ## }
-     
-     ##                                    #str(flow_dist_from_list_projected_combined[[100]])
-     ## flow_dist_from_list_projected<-unlist(x = flow_dist_from_list_projected_combined,
-     ##                                       recursive = F)
-     ## str(flow_dist_from_list_projected)
-
-
      load(file = paste0(file_path, "inference/flow_dist_from_list_polluters.RData"))
 
      # Appending the from list for polluters and projected
@@ -505,13 +476,6 @@ nrow(df_polluter_processed)
      flow_dist_to_list<-list()
 
      flow_dist_to_list  <- vector(mode="list", length=length( df_polluter_nodeID_aggregated))
-     ## flow_dist_to_list[1] <- wrapper_flow_dist_cal(df_polluter= df_polluter_nodeID_aggregated,
-     ##                           anpoll_edgelist = anpoll_edgelist,
-     ##                           shortest_path_anpoll_edgelist = shortest_path_anpoll_edgelist,
-     ##                           total_edgelist_character_modified =
-     ##                               total_edgelist_character_modified,
-     ##                           from_indicator = F, to_indicator = T,
-     ##                           flow_type = "flow_to", file_path = file_path)
 
      ## Actual Code
      # cl <- makeCluster(30)

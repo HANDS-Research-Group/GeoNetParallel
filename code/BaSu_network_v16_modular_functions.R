@@ -701,7 +701,6 @@ projected_nodeIDs_list_generator_new_polluter<-function(file_path,df_polluter_ne
 
   ## Append projected_nodeIDs_list_new to projected_nodeIDs_list
   projected_nodeIDs_list<-rbind(projected_nodeIDs_list,projected_nodeIDs_list_new)
-  
   ## Saving the projected nodeIDs list
   save(projected_nodeIDs_list,file = paste0(file_path,"polluter_files/projected_nodeIDs_list.RData"))
   ## Extracting the vector of projected node_IDs
