@@ -3,10 +3,6 @@ library(tidyverse)
 ## Update the path to the folder
 file_path <- "C:/GeoNet/GeoNet_2021_packageDataset/"
 
-# file_path <- "/gpfs/group/eesi/default/users/aua257/revision_analysis/3km/"
-
-# file_path <- "/Users/Amal/Box Sync/PSU/Geoscience_Research/River network project/Analysis for Spill Paper/To_Alex/Cl_spill_whole/revision_analysis/3km/"
-
 ## Sourcing the modular functions for analysis
 source(file = paste0(file_path, "code/BaSu_network_v16_modular_functions.R"))
 
@@ -26,149 +22,7 @@ df_threshold_dist_km[1,] <- c(5, 5, 0, 10)
 df_threshold_dist_km[2,] <- c(45, 5, 0, 50)
 
 for(j in 1:2) {
-  wrapper_polluter_test <- function(n_chunks, file_path){
-    ## Loading required libraries
-    library(geosphere)
-    library(network)
-    library(igraph)
-    library(mapdata)
-    library(intergraph)
-    require(sna)
-    require(maps)
-    library(GGally)
-    library(MASS)
-    library(foreach)
-    library(doParallel)
-    library(data.table)
-    library(tidyverse)
-    ## Loading the dataframe "df_anpoll_processed"
-    load(file = paste0(file_path,"anpoll_files/df_anpoll_processed.RData"), envir = .GlobalEnv)
-    ## Loading the dataframe "df_polluter_processed"
-    load(file=paste0(file_path,"polluter_files/df_polluter_processed.RData"), envir = .GlobalEnv)
-    
-    ####################################################
-    ## Loading the analyte-polluter network edgelist "anpoll_edgelist"
-    load(file = paste0(file_path,"anpoll_files/anpoll_edgelist.RData"), envir = .GlobalEnv)
-    ## Loading the "total_edgelist_character_modified"
-    load(file = paste0(file_path,"common_files_modified/total_edgelist_character_modified.RData"), envir = .GlobalEnv)
-    ## ## Loading the "flow_dist_from_list"
-    ## load(file = paste0(file_path,"inference/flow_dist_from_list.RData"), envir = .GlobalEnv)
-    ## ## Loading the "flow_dist_to_list"
-    ## load(file = paste0(file_path,"inference/flow_dist_to_list.RData"), envir = .GlobalEnv)
-    ## Loading the projected_nodeIDs_list
-    load(file=paste0(file_path,"polluter_files/projected_nodeIDs_list.RData"), envir = .GlobalEnv)
-    ## ## Loading the distances of polluters to projected nodes
-    ## load(file=paste0(file_path,"polluter_files/flow_dist_polluter_projected_list.RData"),envir = .GlobalEnv)
-    ## Loading the appended polluter processed with county info.
-    load(file = paste0(file_path,"polluter_files/df_polluter_processed.RData"),envir = .GlobalEnv)
-    
-    df_polluter_processed[nrow(df_polluter_processed)+1, ] = df_polluter_processed[nrow(df_polluter_processed), ]
   
-    ####################################################
-    
-    ####################################################
-    ## Recreating chunk information
-    #chunk_size<-ceiling(12/n_chunks)
-    chunk_size <- ceiling(nrow(df_polluter_processed)/n_chunks)
-    #indices_all<-1:12
-    indices_all <- 1:nrow(df_polluter_processed)
-    indices_chunk_list <- split(x = indices_all, ceiling(seq_along(indices_all)/chunk_size))
-    current_indices <- indices_chunk_list[[index]]
-    
-    test_result_chunk_list <- list()
-    
-    for (k in 1:length(current_indices)){
-      chunk_index<-current_indices[k]
-      ## Getting the test result list
-      test_result <- polluter_test_dist_time(df_polluter = df_polluter_processed,
-                                             polluter_lon = df_polluter_processed$lon_mapped[chunk_index],
-                                             polluter_lat = df_polluter_processed$lat_mapped[chunk_index],
-                                             polluter_projected_dist_km = df_threshold_dist_km[j,"polluter_intersection"],
-                                             upstream_threshold_dist_km = df_threshold_dist_km[j,"upstream"],
-                                             downstream_threshold_lower_dist_km = df_threshold_dist_km[j,"downstream_lower"],
-                                             downstream_threshold_upper_dist_km = df_threshold_dist_km[j,"downstream_upper"],
-                                             date_start=as.Date("1920-01-01"),
-                                             date_end=as.Date("2021-12-31"),
-                                             spill_date = df_polluter_processed$date[chunk_index],
-                                             file_path = file_path)
-      test_result_chunk_list[[k]] <- test_result
-  
-      save(test_result, file = paste0(file_path,"inference/test_results/test_result_", chunk_index, ".RData"))
-    }
-    return(test_result_chunk_list)
-  }
-  
-    wrapper_polluter_test_update <- function(n_chunks, df_polluter_to_append, file_path){
-    ## Loading required libraries
-    library(geosphere)
-    library(network)
-    library(igraph)
-    library(mapdata)
-    library(intergraph)
-    require(sna)
-    require(maps)
-    library(GGally)
-    library(MASS)
-    library(foreach)
-    library(doParallel)
-    library(data.table)
-    library(tidyverse)
-    ## Loading the dataframe "df_anpoll_processed"
-    load(file = paste0(file_path,"anpoll_files/df_anpoll_processed.RData"), envir = .GlobalEnv)
-    ## Loading the dataframe "df_polluter_processed"
-    load(file=paste0(file_path,"polluter_files/df_polluter_processed.RData"), envir = .GlobalEnv)
-    
-    ####################################################
-    ## Loading the analyte-polluter network edgelist "anpoll_edgelist"
-    load(file = paste0(file_path,"anpoll_files/anpoll_edgelist.RData"), envir = .GlobalEnv)
-    ## Loading the "total_edgelist_character_modified"
-    load(file = paste0(file_path,"common_files_modified/total_edgelist_character_modified.RData"), envir = .GlobalEnv)
-    ## ## Loading the "flow_dist_from_list"
-    ## load(file = paste0(file_path,"inference/flow_dist_from_list.RData"), envir = .GlobalEnv)
-    ## ## Loading the "flow_dist_to_list"
-    ## load(file = paste0(file_path,"inference/flow_dist_to_list.RData"), envir = .GlobalEnv)
-    ## Loading the projected_nodeIDs_list
-    load(file=paste0(file_path,"polluter_files/projected_nodeIDs_list.RData"), envir = .GlobalEnv)
-    ## ## Loading the distances of polluters to projected nodes
-    ## load(file=paste0(file_path,"polluter_files/flow_dist_polluter_projected_list.RData"),envir = .GlobalEnv)
-    ## Loading the appended polluter processed with county info.
-    load(file = paste0(file_path,"polluter_files/df_polluter_processed.RData"),envir = .GlobalEnv)
-    
-    df_polluter_processed_to_append[nrow(df_polluter_processed_to_append)+1, ] = df_polluter_processed_to_append[nrow(df_polluter_processed_to_append), ]
-  
-    ####################################################
-    
-    ####################################################
-    ## Recreating chunk information
-    #chunk_size<-ceiling(12/n_chunks)
-    chunk_size <- ceiling(nrow(df_polluter_processed_to_append)/n_chunks)
-    #indices_all<-1:12
-    indices_all <- 1:nrow(df_polluter_processed_to_append)
-    indices_chunk_list <- split(x = indices_all, ceiling(seq_along(indices_all)/chunk_size))
-    current_indices <- indices_chunk_list[[index]]
-    
-    test_result_chunk_list <- list()
-    num_polluters_orig <- nrow(df_polluter_processed)
-    for (k in 1:length(current_indices)){
-      chunk_index<-current_indices[k]
-      ## Getting the test result list
-      test_result <- polluter_test_dist_time(df_polluter = df_polluter_processed,
-                                             polluter_lon = df_polluter_processed$lon_mapped[chunk_index],
-                                             polluter_lat = df_polluter_processed$lat_mapped[chunk_index],
-                                             polluter_projected_dist_km = df_threshold_dist_km[j,"polluter_intersection"],
-                                             upstream_threshold_dist_km = df_threshold_dist_km[j,"upstream"],
-                                             downstream_threshold_lower_dist_km = df_threshold_dist_km[j,"downstream_lower"],
-                                             downstream_threshold_upper_dist_km = df_threshold_dist_km[j,"downstream_upper"],
-                                             date_start=as.Date("1920-01-01"),
-                                             date_end=as.Date("2021-12-31"),
-                                             spill_date = df_polluter_processed$date[chunk_index],
-                                             file_path = file_path)
-      test_result_chunk_list[[k]] <- test_result
-
-      save(test_result, file = paste0(file_path,"inference/test_results/test_result_", num_polluters_orig+chunk_index, ".RData"))
-    }
-    return(test_result_chunk_list)
-  }
   
   ########################################################################################################
   
@@ -189,7 +43,7 @@ for(j in 1:2) {
   cl <- makeCluster(spec = n_chunks)
   registerDoParallel(cl)
   test_result_list <- foreach (index = 1:n_chunks)%dopar% {
-    wrapper_polluter_test(n_chunks=n_chunks,file_path = file_path)
+    wrapper_polluter_test(index=index, n_chunks=n_chunks,file_path = file_path)
   }
   stopCluster(cl)
   
