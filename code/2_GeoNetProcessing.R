@@ -227,40 +227,6 @@ anpoll_network_list <- anpoll_network_creator(output_path = file_path)
 
 head(anpoll_network_list[[1]])
 
-                                        # ########################################################################################################
-                                        # ########################################################################################################
-                                        # ###  ###  ###  ###  ###  ###  ###  ###  ###  ###  ###  ###  ###  ###  ###  ###  ###  ###  ###  ###  ###
-                                        # ## Test code!!
-                                        # {## checking vertex ids for shortest path calculations
-                                        #   load(file = paste0(file_path,"analyte_files/analyte_vertex_ids.RData"))
-                                        #   str(analyte_vertex_ids)
-                                        # 
-                                        #   load(file = paste0(file_path,"polluter_files/polluter_vertex_ids.RData"))
-                                        #   str(polluter_vertex_ids)
-                                        # 
-                                        #   load(file = paste0(file_path,"polluter_files/df_polluter_processed.RData"))
-                                        #   str(df_polluter_processed)
-                                        # 
-                                        #   load(file = paste0(file_path,"polluter_files/projected_nodeIDs_list.RData"))
-                                        #   str(projected_nodeIDs_list)
-                                        # 
-                                        #   load(file = paste0(file_path,"polluter_files/projected_nodeIDs_vec.RData"))
-                                        #   str(projected_nodeIDs_vec)
-                                        # 
-                                        #   ## correcting the projected_nodeIDs_vec
-                                        #   projected_nodeIDs_vec<-unlist(projected_nodeIDs_list)
-                                        #   attr(projected_nodeIDs_vec,"names")<-NULL
-                                        #   save(projected_nodeIDs_vec,file = paste0(file_path,"polluter_files/projected_nodeIDs_vec.RData"))
-                                        # 
-                                        #   load(file = paste0(file_path,"polluter_files/projected_nodeIDs_vec.RData"))
-                                        #   str(projected_nodeIDs_vec)
-                                        # 
-                                        #   ## checking the shortest path edgelist
-                                        #   load(file = paste0(file_path,"anpoll_files/shortest_path_anpoll_edgelist.RData"))
-                                        #   str(shortest_path_anpoll_edgelist)
-                                        #   }
-                                        # 
-
 ######################################################################################################
 ######################################################################################################
 ############################################# Inference ##############################################
@@ -277,96 +243,6 @@ load(file = paste0(file_path, "anpoll_files/anpoll_edgelist.RData"))
 load(file = paste0(file_path, "anpoll_files/shortest_path_anpoll_edgelist.RData"))
 ## Loading the "total_edgelist_character_modified"
 load(file = paste0(file_path, "common_files_modified/total_edgelist_character_modified.RData"))
-library(Rcpp)
-sourceCpp('flow_dist_cal_cpp.cpp')
-
-## Defining a wrapper function to calculate flow distance of all polluter nodes in parallel
-wrapper_flow_dist_cal <- function(df_polluter,anpoll_edgelist, shortest_path_anpoll_edgelist, total_edgelist_character_modified, from_indicator, to_indicator, flow_type, file_path){
-    print("index")
-    print(index)
-    ## Defining a function to calculate between a test node and a
-    ## current node. The current nodes are usually polluter nodes.
-    flow_dist_cal<-function(anpoll_edgelist,
-                            shortest_path_anpoll_edgelist,
-                            total_edgelist_character_modified,
-                            test_node_ID, current_node_ID,
-                            from_indicator, to_indicator, file_path){
-        ## Getting the edge row ID
-        if(from_indicator){
-            edge_row_ID<-which((anpoll_edgelist[,1]==test_node_ID) &
-                               (anpoll_edgelist[,2]==current_node_ID))
-        }else if(to_indicator){
-            edge_row_ID<-which(
-            (anpoll_edgelist[,1]==current_node_ID) &
-            (anpoll_edgelist[,2]==test_node_ID))
-        }
-        ## Initializing and loop to fill up the matrix of edges that
-        ## are formed by the nodeIDs in the path of test and current
-        ## node ID
-        flow_path_nodeIDs<- matrix(NA_character_,
-                                   nrow =
-                                       (length(shortest_path_anpoll_edgelist[[edge_row_ID]])-1),
-                                   ncol = 2)
-        for (i in 1:(length(shortest_path_anpoll_edgelist[[edge_row_ID]])-1)){
-            flow_path_nodeIDs[i,]<- c(shortest_path_anpoll_edgelist[[edge_row_ID]][i],
-                                      shortest_path_anpoll_edgelist[[edge_row_ID]][i+1])
-        }
-        ## Loading the total_edgelist_character_modified
-        load(file = paste0(file_path,"common_files_modified/stream_path_dist_vec.RData"))
-        ## Initializing the flow distance in meters
-        flow_dist_m<-0
-        ## Loop to add up the flow distance of all edges in the flow_path_nodeIDs
-        ## for(i in 1:nrow(flow_path_nodeIDs)){
-        ##     additional_dist <- stream_path_dist_vec[which(
-        ##     (total_edgelist_character_modified[,1]==flow_path_nodeIDs[i,1]) &
-        ##     (total_edgelist_character_modified[,2]==flow_path_nodeIDs[i,2]))]
-        ##     if(length(additional_dist)>0){
-        ##         flow_dist_m <- flow_dist_m + as.numeric(stream_path_dist_vec[which(
-        ##         (total_edgelist_character_modified[,1]==flow_path_nodeIDs[i,1]) &
-        ##         (total_edgelist_character_modified[,2]==flow_path_nodeIDs[i,2]))])
-        ##     }
-        ## }
-
-        flow_dist_m  <- getDistance(flow_path_nodeIDs = flow_path_nodeIDs,
-                                      total_edgelist = total_edgelist_character_modified,
-                                      stream_path_dist = stream_path_dist_vec)
-
-        ## flow distance in km
-        flow_dist_km<-flow_dist_m/1000
-        
-        return(flow_dist_km)
-    }
-    ## Extracting all connected nodeIDs
-    if(from_indicator){
-        connected_nodeIDs<-anpoll_edgelist[which(anpoll_edgelist[,2]==df_polluter$nodeID[index]),1]
-    }else if(to_indicator){
-        connected_nodeIDs<-anpoll_edgelist[which(anpoll_edgelist[,1]==df_polluter$nodeID[index]),2]
-    }
-    ## Initializing the flow_dist_vec as NA. If there are no connected
-    ## nodes, this would remain NA
-    flow_dist_vec<-NA
-    if(length(connected_nodeIDs)>0){
-        flow_dist_vec<-rep(NA_integer_,length(connected_nodeIDs))
-        print(length(connected_nodeIDs))
-        for(j in 1:length(connected_nodeIDs)){
-            ## debug(flow_dist_cal)
-            flow_dist_vec[j]<-flow_dist_cal(anpoll_edgelist = anpoll_edgelist,
-                                            shortest_path_anpoll_edgelist = shortest_path_anpoll_edgelist,
-                                            total_edgelist_character_modified = total_edgelist_character_modified,
-                                            test_node_ID = connected_nodeIDs[j],
-                                            current_node_ID = df_polluter$nodeID[index],
-                                            from_indicator = from_indicator,
-                                            to_indicator = to_indicator,
-                                            file_path = file_path)
-            ## print(j)
-        }
-    }
-    save(flow_dist_vec, file = paste0(file_path,"anpoll_files/",
-                                      flow_type, "/flow_from_", index,
-                                      ".RData"))
-    ## save(flow_dist_vec, file = paste0(file_path,"anpoll_files/projected_missing_ids/flow_from_", index,".RData"))
-    return(flow_dist_vec)
-}
 
 ## Loading the dataframe "df_anpoll_processed"
 load(file = paste0(file_path, "anpoll_files/df_anpoll_processed.RData"))
@@ -419,7 +295,7 @@ nrow(df_polluter_processed)
      flow_dist_from_list_polluters <- foreach (index = 1:nrow(df_polluter_nodeID_aggregated), .packages="Rcpp", .noexport = "getDistance") %do% {
 
          sourceCpp('flow_dist_cal_cpp.cpp')
-         wrapper_flow_dist_cal(df_polluter = df_polluter_nodeID_aggregated,
+         wrapper_flow_dist_cal(index, df_polluter = df_polluter_nodeID_aggregated,
                                anpoll_edgelist = anpoll_edgelist,
                                shortest_path_anpoll_edgelist = shortest_path_anpoll_edgelist,
                                total_edgelist_character_modified =
@@ -446,7 +322,7 @@ nrow(df_polluter_processed)
 
      flow_dist_from_list_projected<-foreach (index =1:nrow(df_projected_nodeIDs), .packages="Rcpp", .noexport = "getDistance")%do% {
          sourceCpp('flow_dist_cal_cpp.cpp')
-         wrapper_flow_dist_cal(df_polluter=df_projected_nodeIDs,
+         wrapper_flow_dist_cal(index, df_polluter=df_projected_nodeIDs,
                                anpoll_edgelist = anpoll_edgelist,
                                shortest_path_anpoll_edgelist = shortest_path_anpoll_edgelist,
                                total_edgelist_character_modified = total_edgelist_character_modified,
@@ -482,7 +358,7 @@ nrow(df_polluter_processed)
      # registerDoParallel(cl)
      flow_dist_to_list<-foreach (index = 1:nrow(df_polluter_nodeID_aggregated), .packages="Rcpp", .noexport = "getDistance")%do% {
          sourceCpp('flow_dist_cal_cpp.cpp')
-         wrapper_flow_dist_cal(df_polluter= df_polluter_nodeID_aggregated,
+         wrapper_flow_dist_cal(index, df_polluter= df_polluter_nodeID_aggregated,
                                anpoll_edgelist = anpoll_edgelist,
                                shortest_path_anpoll_edgelist = shortest_path_anpoll_edgelist,
                                total_edgelist_character_modified =
