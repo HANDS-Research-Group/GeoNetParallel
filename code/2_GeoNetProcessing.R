@@ -74,8 +74,8 @@ head(df_anpoll_preprocessed)
 tail(df_anpoll_preprocessed)
 
 ## tallying the number of polluter sources
-df_anpoll_preprocessed %>% as_tibble() %>% group_by(anpoll_indicator) %>% summarise(n = n())
-
+# df_anpoll_preprocessed %>% as_tibble() %>% group_by(anpoll_indicator) %>% summarise(n = n())
+summarise(n=n(),data=group_by(anpoll_indicator, as_tibble(df_anpoll_preprocessed)))
 ## saving this dataframe
 save(df_anpoll_preprocessed, file = paste0(file_path,"anpoll_files/df_anpoll_preprocessed.RData"))
 
