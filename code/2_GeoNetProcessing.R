@@ -292,6 +292,7 @@ nrow(df_polluter_processed)
      # cl <- makeCluster(30)
      # registerDoParallel(cl)
      ## flow_dist_from_list_polluters <- foreach (index = 1:nrow(df_polluter_nodeID_aggregated)) %dopar%{
+     sourceCpp( paste0(file_path, "code/flow_dist_cal_cpp.cpp") )
      flow_dist_from_list_polluters <- foreach (index = 1:nrow(df_polluter_nodeID_aggregated), .packages="Rcpp", .noexport = "getDistance") %do% {
 
          #sourceCpp( paste0(file_path, "code/flow_dist_cal_cpp.cpp") )
@@ -319,7 +320,7 @@ nrow(df_polluter_processed)
 
      # cl <- makeCluster(50)
      # registerDoParallel(cl)
-
+    sourceCpp( paste0(file_path, "code/flow_dist_cal_cpp.cpp") )
      flow_dist_from_list_projected<-foreach (index =1:nrow(df_projected_nodeIDs), .packages="Rcpp", .noexport = "getDistance")%do% {
          sourceCpp('flow_dist_cal_cpp.cpp')
          wrapper_flow_dist_cal(index, df_polluter=df_projected_nodeIDs,
@@ -356,6 +357,7 @@ nrow(df_polluter_processed)
      ## Actual Code
      # cl <- makeCluster(30)
      # registerDoParallel(cl)
+     sourceCpp( paste0(file_path, "code/flow_dist_cal_cpp.cpp") )
      flow_dist_to_list<-foreach (index = 1:nrow(df_polluter_nodeID_aggregated), .packages="Rcpp", .noexport = "getDistance")%do% {
          sourceCpp('flow_dist_cal_cpp.cpp')
          wrapper_flow_dist_cal(index, df_polluter= df_polluter_nodeID_aggregated,

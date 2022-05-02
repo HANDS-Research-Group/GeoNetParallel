@@ -1472,7 +1472,7 @@ fdr_decision_cal <- function(p_val,alpha){
       i_max <- i
       flag_atleast_1_discovery <- 1
       fdr_decision[order(p_val)[1:i_max]] <- 1
-      break()
+      break
     }
   }
   return(list(fdr_decision, flag_atleast_1_discovery))
