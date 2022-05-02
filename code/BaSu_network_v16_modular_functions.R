@@ -19,7 +19,7 @@ library(doParallel)
 library(data.table)
 library(tidyverse)}
 library(Rcpp)
-sourceCpp('flow_dist_cal_cpp.cpp')
+# sourceCpp('flow_dist_cal_cpp.cpp')
 
 # library(lubridate)
 
@@ -140,7 +140,7 @@ two_step_anpoll_mapper<-function(df_anpoll_preprocessed,output_path){
     ## registerDoParallel(cl)
     ## foreach(i = 1:nrow(df_anpoll_preprocessed), .packages="geosphere") %dopar% {
     for(i in 1:nrow(df_anpoll_preprocessed)) {
-    dist_vec_step1<-distm(x = as.matrix(df_anpoll_preprocessed[i,c("lon","lat")]),y = as.matrix(df_node_latlong_modified[,c("lon","lat")]))
+    dist_vec_step1<-geosphere::distm(x = as.matrix(df_anpoll_preprocessed[i,c("lon","lat")]),y = as.matrix(df_node_latlong_modified[,c("lon","lat")]))
     ## Getting the top ten nearest node IDs for sampling site i 
     top_ten_node_IDs_sampling_site_i<-df_node_latlong_modified$nodeID[order(as.vector(dist_vec_step1))[1:10]]
     ## Getting the stream IDs in the original edgelist which orginate or end in these top ten node IDs
@@ -154,7 +154,7 @@ two_step_anpoll_mapper<-function(df_anpoll_preprocessed,output_path){
       stream_sub_list[[j]][,4]<-0 ## Initializing start and end flag of stream
       stream_sub_list[[j]][1,4]<-1 ## Marking the start flag of stream as 1
       stream_sub_list[[j]][nrow(stream_sub_list[[j]]),4]<-2 ## Marking the start flag of stream as 2
-      dist_to_stream[j,]<-dist2Line(p = as.matrix(df_anpoll_preprocessed[i,c("lon","lat")]),line = stream_sub_list[[j]][,c(1,2)])
+      dist_to_stream[j,]<-geosphere::dist2Line(p = as.matrix(df_anpoll_preprocessed[i,c("lon","lat")]),line = stream_sub_list[[j]][,c(1,2)])
     }
     ## Combining the path information for all these streams in one big dataframe with 3rd column depicting the local stream_ID
     stream_sub_df<-do.call(what = rbind,args = stream_sub_list)
@@ -163,10 +163,10 @@ two_step_anpoll_mapper<-function(df_anpoll_preprocessed,output_path){
     ## Row ids in stream_sub_df which corresponds to selected stream
     stream_selected_row_IDs<-which(stream_sub_df[,3]==which.min(dist_to_stream[,1]))
     ## Calculating the distance of the i^th C-PP location to all the path latlong in this dataframe to judge whether the shortest distance to the selected stream occurs at midpoint or one of the endpoints
-    dist_to_points<-as.vector(distm(x = as.matrix(df_anpoll_preprocessed[i,c("lon","lat")]), y = as.matrix(stream_sub_df[stream_selected_row_IDs,c(1,2)])))
+    dist_to_points<-as.vector(geosphere::distm(x = as.matrix(df_anpoll_preprocessed[i,c("lon","lat")]), y = as.matrix(stream_sub_df[stream_selected_row_IDs,c(1,2)])))
     if(order(dist_to_points)[1]%in%c(1,length(dist_to_points))){
       if(order(dist_to_points)[1]==1){
-        dist_12<-as.numeric(distm(x = as.matrix(stream_sub_df[stream_selected_row_IDs[1],c(1,2)]), y = as.matrix(stream_sub_df[stream_selected_row_IDs[2],c(1,2)])))
+        dist_12<-as.numeric(geosphere::distm(x = as.matrix(stream_sub_df[stream_selected_row_IDs[1],c(1,2)]), y = as.matrix(stream_sub_df[stream_selected_row_IDs[2],c(1,2)])))
         angle_CPP_1_2<-acos(x = ((dist_to_points[1]^2+dist_12^2-dist_to_points[2]^2)/(2*dist_to_points[1]*dist_12)))*(180/pi)
         coincide_condition<-prod((as.numeric(stream_sub_df[stream_selected_row_IDs[1],c(1,2)])==as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])))
         if(!is.nan(angle_CPP_1_2)){
@@ -183,7 +183,7 @@ two_step_anpoll_mapper<-function(df_anpoll_preprocessed,output_path){
           }
         }
       }else if(order(dist_to_points)[1]==length(dist_to_points)){
-        dist_end_12<-as.numeric(distm(x = as.matrix(stream_sub_df[stream_selected_row_IDs[length(stream_selected_row_IDs)-1],c(1,2)]), y = as.matrix(stream_sub_df[stream_selected_row_IDs[length(stream_selected_row_IDs)],c(1,2)])))
+        dist_end_12<-as.numeric(geosphere::distm(x = as.matrix(stream_sub_df[stream_selected_row_IDs[length(stream_selected_row_IDs)-1],c(1,2)]), y = as.matrix(stream_sub_df[stream_selected_row_IDs[length(stream_selected_row_IDs)],c(1,2)])))
         angle_CPP_end_1_2<-acos(x = ((dist_to_points[length(dist_to_points)]^2+dist_end_12^2-dist_to_points[length(dist_to_points)-1]^2)/(2*dist_to_points[length(dist_to_points)]*dist_end_12)))*(180/pi)
         coincide_condition<-prod((as.numeric(stream_sub_df[stream_selected_row_IDs[length(stream_selected_row_IDs)],c(1,2)])==as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])))
         if(!is.nan(angle_CPP_end_1_2)){
@@ -205,7 +205,7 @@ two_step_anpoll_mapper<-function(df_anpoll_preprocessed,output_path){
     }
     ##%>%addCircleMarkers(lng = dist_to_stream[,2],lat = dist_to_stream[,3], radius = 4,color = "yellow")
     if(df_anpoll_preprocessed$lat_mapped[i]>90) { df_anpoll_preprocessed$lat_mapped[i] = 90}
-    dist_mapped[i]<-distm(x = df_anpoll_preprocessed[i,c("lon","lat")],y = df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")])
+    dist_mapped[i]<-geosphere::distm(x = df_anpoll_preprocessed[i,c("lon","lat")],y = df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")])
     #print(i)
   }
   ## stopCluster(cl)
@@ -297,7 +297,7 @@ two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path){
   flag_mid<-0
   ## Two step mapping loop for each row in df_anpoll_preprocessed; 1st step: Get top ten nearest node IDs, 2nd step: Create new nodes and streams by mapping to the river streams corresponding to top ten nearest node IDs
   for(i in 1:nrow(df_anpoll_preprocessed)) {
-    dist_vec_step1<-distm(x = as.matrix(df_anpoll_preprocessed[i,c("lon","lat")]),y = as.matrix(df_node_latlong_modified[,c("lon","lat")]))
+    dist_vec_step1<-geosphere::distm(x = as.matrix(df_anpoll_preprocessed[i,c("lon","lat")]),y = as.matrix(df_node_latlong_modified[,c("lon","lat")]))
     ## Getting the top ten nearest node IDs for sampling site i 
     top_ten_node_IDs_sampling_site_i<-df_node_latlong_modified$nodeID[order(as.vector(dist_vec_step1))[1:10]]
     ## Getting the stream IDs in the original edgelist which orginate or end in these top ten node IDs
@@ -311,7 +311,7 @@ two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path){
       stream_sub_list[[j]][,4]<-0 ## Initializing start and end flag of stream
       stream_sub_list[[j]][1,4]<-1 ## Marking the start flag of stream as 1
       stream_sub_list[[j]][nrow(stream_sub_list[[j]]),4]<-2 ## Marking the start flag of stream as 2
-      dist_to_stream[j,]<-dist2Line(p = as.matrix(df_anpoll_preprocessed[i,c("lon","lat")]),line = stream_sub_list[[j]][,c(1,2)])
+      dist_to_stream[j,]<-geosphere::dist2Line(p = as.matrix(df_anpoll_preprocessed[i,c("lon","lat")]),line = stream_sub_list[[j]][,c(1,2)])
     }
     ## Combining the path information for all these streams in one big dataframe with 3rd column depicting the local stream_ID
     stream_sub_df<-do.call(what = rbind,args = stream_sub_list)
@@ -320,10 +320,10 @@ two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path){
     ## Row ids in stream_sub_df which corresponds to selected stream
     stream_selected_row_IDs<-which(stream_sub_df[,3]==which.min(dist_to_stream[,1]))
     ## Calculating the distance of the i^th C-PP location to all the path latlong in this dataframe to judge whether the shortest distance to the selected stream occurs at midpoint or one of the endpoints
-    dist_to_points<-as.vector(distm(x = as.matrix(df_anpoll_preprocessed[i,c("lon","lat")]), y = as.matrix(stream_sub_df[stream_selected_row_IDs,c(1,2)])))
+    dist_to_points<-as.vector(geosphere::distm(x = as.matrix(df_anpoll_preprocessed[i,c("lon","lat")]), y = as.matrix(stream_sub_df[stream_selected_row_IDs,c(1,2)])))
     if(order(dist_to_points)[1]%in%c(1,length(dist_to_points))){
       if(order(dist_to_points)[1]==1){
-        dist_12<-as.numeric(distm(x = as.matrix(stream_sub_df[stream_selected_row_IDs[1],c(1,2)]), y = as.matrix(stream_sub_df[stream_selected_row_IDs[2],c(1,2)])))
+        dist_12<-as.numeric(geosphere::distm(x = as.matrix(stream_sub_df[stream_selected_row_IDs[1],c(1,2)]), y = as.matrix(stream_sub_df[stream_selected_row_IDs[2],c(1,2)])))
         angle_CPP_1_2<-acos(x = ((dist_to_points[1]^2+dist_12^2-dist_to_points[2]^2)/(2*dist_to_points[1]*dist_12)))*(180/pi)
         coincide_condition<-prod((as.numeric(stream_sub_df[stream_selected_row_IDs[1],c(1,2)])==as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])))
         if(!is.nan(angle_CPP_1_2)){
@@ -340,7 +340,7 @@ two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path){
           }
         }
       }else if(order(dist_to_points)[1]==length(dist_to_points)){
-        dist_end_12<-as.numeric(distm(x = as.matrix(stream_sub_df[stream_selected_row_IDs[length(stream_selected_row_IDs)-1],c(1,2)]), y = as.matrix(stream_sub_df[stream_selected_row_IDs[length(stream_selected_row_IDs)],c(1,2)])))
+        dist_end_12<-as.numeric(geosphere::distm(x = as.matrix(stream_sub_df[stream_selected_row_IDs[length(stream_selected_row_IDs)-1],c(1,2)]), y = as.matrix(stream_sub_df[stream_selected_row_IDs[length(stream_selected_row_IDs)],c(1,2)])))
         angle_CPP_end_1_2<-acos(x = ((dist_to_points[length(dist_to_points)]^2+dist_end_12^2-dist_to_points[length(dist_to_points)-1]^2)/(2*dist_to_points[length(dist_to_points)]*dist_end_12)))*(180/pi)
         coincide_condition<-prod((as.numeric(stream_sub_df[stream_selected_row_IDs[length(stream_selected_row_IDs)],c(1,2)])==as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])))
         if(!is.nan(angle_CPP_end_1_2)){
@@ -362,7 +362,7 @@ two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path){
     }
     ##%>%addCircleMarkers(lng = dist_to_stream[,2],lat = dist_to_stream[,3], radius = 4,color = "yellow")
     if(df_anpoll_preprocessed$lat_mapped[i]>90) { df_anpoll_preprocessed$lat_mapped[i] = 90}
-    dist_mapped[i]<-distm(x = df_anpoll_preprocessed[i,c("lon","lat")],y = df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")])
+    dist_mapped[i]<-geosphere::distm(x = df_anpoll_preprocessed[i,c("lon","lat")],y = df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")])
     #print(i)
   }
   ## stopCluster(cl)
@@ -400,7 +400,7 @@ stream_path_dist_cal<-function(output_path){
   stream_path_dist_vec<-rep(0,nrow(total_edgelist_character_modified))
   for(i in 1:nrow(total_edgelist_character_modified)){
     for (j in 1:(nrow(stream_list_modified[[i]])-1)){
-      stream_path_dist_vec[i]<-stream_path_dist_vec[i]+as.numeric(distm(x = stream_list_modified[[i]][j,],y = stream_list_modified[[i]][j+1,]))
+      stream_path_dist_vec[i]<-stream_path_dist_vec[i]+as.numeric(geosphere::distm(x = stream_list_modified[[i]][j,],y = stream_list_modified[[i]][j+1,]))
     }
   }
   save(stream_path_dist_vec,file = paste0(output_path,"common_files_modified/stream_path_dist_vec.RData"))
@@ -451,14 +451,14 @@ river_net_subset<-function(output_path){
   ## Loading the "total_edgelist_character_modified"
   load(file = paste0(output_path,"common_files_modified/total_edgelist_character_modified.RData"))
   ## Creating the igraph object from "total_edgelist_character_modified"
-  igraph_river_whole<-graph_from_edgelist(total_edgelist_character_modified[,c(1,2)], directed = TRUE)
+  igraph_river_whole<-igraph::graph_from_edgelist(total_edgelist_character_modified[,c(1,2)], directed = TRUE)
   save(igraph_river_whole,file = paste0(output_path,"common_files_modified/igraph_river_whole.RData"))
   ## Finding connected clusters in whole graph and getting "graph_order"
-  connected_clusters<-clusters(igraph_river_whole)
+  connected_clusters<-igraph::clusters(igraph_river_whole)
   graph_order<-order(connected_clusters$csize,decreasing = TRUE)
   save(graph_order,file = paste0(output_path,"common_files_modified/graph_order.RData"))
   ## Decomposing graph into connected subgraphs
-  igraph_river_decomposed_list <- decompose.graph(igraph_river_whole)
+  igraph_river_decomposed_list <- igraph::decompose.graph(igraph_river_whole)
   save(igraph_river_decomposed_list,file = paste0(output_path,"common_files_modified/igraph_river_decomposed_list.RData"))
   return(list(igraph_river_whole,graph_order,igraph_river_decomposed_list))
 }
@@ -473,20 +473,20 @@ vertex_IDs_generator<-function(df_anpoll_nodeID_aggregated,output_path,analyte=T
   load(file = paste0(output_path,"common_files_modified/igraph_river_decomposed_list.RData"))
   ## Adding Observation vertex attributes in rank_subgraph
   ## checking how many observation node IDs overlap over overall nodeIDs in whole graph
-  sum(V(igraph_river_whole)$name%in%df_anpoll_nodeID_aggregated$nodeID)
+  sum(igraph::V(igraph_river_whole)$name%in%df_anpoll_nodeID_aggregated$nodeID)
   ## checking how many observation node IDs overlap over overall nodeIDs in rank_subgraph biggest subgraph
-  sum(V(igraph_river_decomposed_list[[graph_order[rank_subgraph]]])$name%in%df_anpoll_nodeID_aggregated$nodeID)
+  sum(igraph::V(igraph_river_decomposed_list[[graph_order[rank_subgraph]]])$name%in%df_anpoll_nodeID_aggregated$nodeID)
   if(graph_subset){
     if(analyte){
       ## setting vertex attributes as observation being true/false
-      igraph_river_decomposed_list[[graph_order[rank_subgraph]]]<-set_vertex_attr(graph = igraph_river_decomposed_list[[graph_order[rank_subgraph]]],name = "analyte",index = V(igraph_river_decomposed_list[[graph_order[rank_subgraph]]]),value = V(igraph_river_decomposed_list[[graph_order[rank_subgraph]]])$name%in%df_anpoll_nodeID_aggregated$nodeID)
+      igraph_river_decomposed_list[[graph_order[rank_subgraph]]]<-igraph::set_vertex_attr(graph = igraph_river_decomposed_list[[graph_order[rank_subgraph]]],name = "analyte",index = igraph::V(igraph_river_decomposed_list[[graph_order[rank_subgraph]]]),value = igraph::V(igraph_river_decomposed_list[[graph_order[rank_subgraph]]])$name%in%df_anpoll_nodeID_aggregated$nodeID)
       ## extracting vertex ids corresponding to observation locations
-      analyte_vertex_ids<-which(vertex_attr(graph = igraph_river_decomposed_list[[graph_order[rank_subgraph]]])$`analyte`==TRUE)
+      analyte_vertex_ids<-which(igraph::vertex_attr(graph = igraph_river_decomposed_list[[graph_order[rank_subgraph]]])$`analyte`==TRUE)
       ## saving the vertex ids in rank subgraph corresponding to analyte observations unique sites
       save(analyte_vertex_ids,file = paste0(output_path,"analyte_files/analyte_vertex_ids.RData"))
       anpoll_vertex_ids<-analyte_vertex_ids
       ## analyte node IDs for the rank subgraph
-      analyte_nodeIDs_rank_subgraph<-V(igraph_river_decomposed_list[[graph_order[rank_subgraph]]])$name[analyte_vertex_ids]
+      analyte_nodeIDs_rank_subgraph<-igraph::V(igraph_river_decomposed_list[[graph_order[rank_subgraph]]])$name[analyte_vertex_ids]
       ## Appending the "df_anpoll_nodeID_aggregated" with a column rank_subgraph_indicator that is TRUE or FALSE depending on whether the corresponding nodes are in rank_subgraph
       df_anpoll_nodeID_aggregated$rank_subgraph_indicator<-df_anpoll_nodeID_aggregated$nodeID%in%analyte_nodeIDs_rank_subgraph
       df_analyte_nodeID_aggregated<-df_anpoll_nodeID_aggregated
@@ -494,14 +494,14 @@ vertex_IDs_generator<-function(df_anpoll_nodeID_aggregated,output_path,analyte=T
       save(df_analyte_nodeID_aggregated,file = paste0(output_path,"analyte_files/df_analyte_nodeID_aggregated.RData"))
     }else if(polluter){
       ## setting vertex attributes as observation being true/false
-      igraph_river_decomposed_list[[graph_order[rank_subgraph]]]<-set_vertex_attr(graph = igraph_river_decomposed_list[[graph_order[rank_subgraph]]],name = "polluter",index = V(igraph_river_decomposed_list[[graph_order[rank_subgraph]]]),value = V(igraph_river_decomposed_list[[graph_order[rank_subgraph]]])$name%in%df_anpoll_nodeID_aggregated$nodeID)
+      igraph_river_decomposed_list[[graph_order[rank_subgraph]]]<-igraph::set_vertex_attr(graph = igraph_river_decomposed_list[[graph_order[rank_subgraph]]],name = "polluter",index = igraph::V(igraph_river_decomposed_list[[graph_order[rank_subgraph]]]),value = igraph::V(igraph_river_decomposed_list[[graph_order[rank_subgraph]]])$name%in%df_anpoll_nodeID_aggregated$nodeID)
       ## extracting vertex ids corresponding to observation locations
-      polluter_vertex_ids<-which(vertex_attr(graph = igraph_river_decomposed_list[[graph_order[rank_subgraph]]])$`polluter`==TRUE)
+      polluter_vertex_ids<-which(igraph::vertex_attr(graph = igraph_river_decomposed_list[[graph_order[rank_subgraph]]])$`polluter`==TRUE)
       ## saving the vertex ids in rank subgraph corresponding to polluter observations unique sites
       save(polluter_vertex_ids,file = paste0(output_path,"polluter_files/polluter_vertex_ids.RData"))
       anpoll_vertex_ids<-polluter_vertex_ids
       ## polluter node IDs for the rank subgraph
-      polluter_nodeIDs_rank_subgraph<-V(igraph_river_decomposed_list[[graph_order[rank_subgraph]]])$name[polluter_vertex_ids]
+      polluter_nodeIDs_rank_subgraph<-igraph::V(igraph_river_decomposed_list[[graph_order[rank_subgraph]]])$name[polluter_vertex_ids]
       ## Appending the "df_anpoll_nodeID_aggregated" with a column rank_subgraph_indicator that is TRUE or FALSE depending on whether the corresponding nodes are in rank_subgraph
       df_anpoll_nodeID_aggregated$rank_subgraph_indicator<-df_anpoll_nodeID_aggregated$nodeID%in%polluter_nodeIDs_rank_subgraph
       df_polluter_nodeID_aggregated<-df_anpoll_nodeID_aggregated
@@ -511,7 +511,7 @@ vertex_IDs_generator<-function(df_anpoll_nodeID_aggregated,output_path,analyte=T
   }else{
     if(analyte){
       ## setting vertex attributes as observation being true/false
-      igraph_river_whole<-set_vertex_attr(graph = igraph_river_whole,name = "analyte",index = V(igraph_river_whole),value = V(igraph_river_whole)$name%in%df_anpoll_nodeID_aggregated$nodeID)
+      igraph_river_whole<-igraph::set_vertex_attr(graph = igraph_river_whole,name = "analyte",index = igraph::V(igraph_river_whole),value = igraph::V(igraph_river_whole)$name%in%df_anpoll_nodeID_aggregated$nodeID)
       ## extracting vertex ids corresponding to observation locations
       analyte_vertex_ids<-which(vertex_attr(graph = igraph_river_whole)$`analyte`==TRUE)
       ## saving the vertex ids in rank subgraph corresponding to analyte observations unique sites
@@ -519,7 +519,7 @@ vertex_IDs_generator<-function(df_anpoll_nodeID_aggregated,output_path,analyte=T
       anpoll_vertex_ids<-analyte_vertex_ids
     }else if(polluter){
       ## setting vertex attributes as observation being true/false
-      igraph_river_whole<-set_vertex_attr(graph = igraph_river_whole,name = "polluter",index = V(igraph_river_whole),value = V(igraph_river_whole)$name%in%df_anpoll_nodeID_aggregated$nodeID)
+      igraph_river_whole<-set_vertex_attr(graph = igraph_river_whole,name = "polluter",index = igraph::V(igraph_river_whole),value = igraph::V(igraph_river_whole)$name%in%df_anpoll_nodeID_aggregated$nodeID)
       ## extracting vertex ids corresponding to observation locations
       polluter_vertex_ids<-which(vertex_attr(graph = igraph_river_whole)$`polluter`==TRUE)
       ## saving the vertex ids in rank subgraph corresponding to polluter observations unique sites
@@ -552,21 +552,21 @@ projected_nodeIDs_list_generator<-function(file_path,projected_threshold_dist_km
   #vertex_IDs_all<-which(V(igraph_river_whole)$name%in%df_node_latlong$nodeID)
   for(i in 1:nrow(df_polluter_processed)){
     ## Getting the node ids of top 1000 nearest nodes
-    dist_vec<-distm(x = as.matrix(df_polluter_processed[i,c("lon","lat")]),y = as.matrix(df_node_latlong[,c("lon","lat")]))
+    dist_vec<-geosphere::distm(x = as.matrix(df_polluter_processed[i,c("lon","lat")]),y = as.matrix(df_node_latlong[,c("lon","lat")]))
     ## Getting the node IDs which lie within the projected_distance_threshold_km 
     node_IDs_site_i <- df_node_latlong$nodeID[which(dist_vec<=(projected_threshold_dist_km*1000))]
     
     ## Extracting vertex ids corresponding to these subsetted nodeIDs
-    vertex_IDs_site_i <- which(V(igraph_river_whole)$name %in% node_IDs_site_i)
+    vertex_IDs_site_i <- which(igraph::V(igraph_river_whole)$name %in% node_IDs_site_i)
     #vertex_IDs_site_i<-vertex_IDs_all
     ## Getting the shortest path from polluter_i to all the subsetted nodes
     #ptm<-proc.time()
-    short_path <- shortest_paths(graph = igraph_river_whole, from = which(V(igraph_river_whole)$name %in% df_polluter_processed$nodeID[i]), to = vertex_IDs_site_i,mode = "out",output = "vpath")
+    short_path <- igraph::shortest_paths(graph = igraph_river_whole, from = which(igraph::V(igraph_river_whole)$name %in% df_polluter_processed$nodeID[i]), to = vertex_IDs_site_i,mode = "out",output = "vpath")
     #print(proc.time()-ptm)
     ## Trimming the paths with length 0 and storing all paths (among nodeIDs) in a list
     short_path_list<-lapply(X = short_path$vpath,FUN = function(x){
-      if(length(as_ids(x))>0){
-        y<-as_ids(x)
+      if(length(igraph::as_ids(x))>0){
+        y<-igraph::as_ids(x)
         return(y)
       }
     })
@@ -641,21 +641,21 @@ projected_nodeIDs_list_generator_new_polluter<-function(file_path,df_polluter_ne
     }
     else{
     ## Getting the node ids of top 1000 nearest nodes
-    dist_vec<-distm(x = as.matrix(df_polluter_new[i,c("lon","lat")]),y = as.matrix(df_node_latlong[,c("lon","lat")]))
+    dist_vec<-geosphere::distm(x = as.matrix(df_polluter_new[i,c("lon","lat")]),y = as.matrix(df_node_latlong[,c("lon","lat")]))
     ## Getting the node IDs which lie within the projected_distance_threshold_km 
     node_IDs_site_i <- df_node_latlong$nodeID[which(dist_vec<=(projected_threshold_dist_km*1000))]
     
     ## Extracting vertex ids corresponding to these subsetted nodeIDs
-    vertex_IDs_site_i <- which(V(igraph_river_whole)$name %in% node_IDs_site_i)
+    vertex_IDs_site_i <- which(igraph::V(igraph_river_whole)$name %in% node_IDs_site_i)
     #vertex_IDs_site_i<-vertex_IDs_all
     ## Getting the shortest path from polluter_i to all the subsetted nodes
     #ptm<-proc.time()
-    short_path <- shortest_paths(graph = igraph_river_whole, from = which(V(igraph_river_whole)$name %in% df_polluter_new$nodeID[i]), to = vertex_IDs_site_i,mode = "out",output = "vpath")
+    short_path <- igraph::shortest_paths(graph = igraph_river_whole, from = which(igraph::V(igraph_river_whole)$name %in% df_polluter_new$nodeID[i]), to = vertex_IDs_site_i,mode = "out",output = "vpath")
     #print(proc.time()-ptm)
     ## Trimming the paths with length 0 and storing all paths (among nodeIDs) in a list
     short_path_list<-lapply(X = short_path$vpath,FUN = function(x){
-      if(length(as_ids(x))>0){
-        y<-as_ids(x)
+      if(length(igraph::as_ids(x))>0){
+        y<-igraph::as_ids(x)
         return(y)
       }
     })
@@ -743,16 +743,16 @@ flow_dist_polluter_projected_cal<-function(file_path){
     ## if condition to check if there is atleast one projected node for ith polluter
     if(length(projected_nodeIDs_list[[i]])>0){
       ## Extracting vertex ids corresponding to these subsetted nodeIDs
-      vertex_IDs_projected_i<-which(V(igraph_river_whole)$name%in%projected_nodeIDs_list[[i]])
+      vertex_IDs_projected_i<-which(igraph::V(igraph_river_whole)$name%in%projected_nodeIDs_list[[i]])
       #vertex_IDs_site_i<-vertex_IDs_all
       ## Getting the shortest path from polluter_i to all the subsetted nodes
       #ptm<-proc.time()
-      short_path<-shortest_paths(graph = igraph_river_whole,from=which(V(igraph_river_whole)$name%in%current_node_ID), to= vertex_IDs_projected_i,mode = "out",output = "vpath")
+      short_path<-igraph::shortest_paths(graph = igraph_river_whole,from=which(igraph::V(igraph_river_whole)$name%in%current_node_ID), to= vertex_IDs_projected_i,mode = "out",output = "vpath")
       #print(proc.time()-ptm)
       ## Trimming the paths with length 0 and storing all paths (among nodeIDs) in a list
       short_path_list<-lapply(X = short_path$vpath,FUN = function(x){
-        if(length(as_ids(x))>0){
-          y<-as_ids(x)
+        if(length(igraph::as_ids(x))>0){
+          y<-igraph::as_ids(x)
           return(y)
         }
       })
@@ -785,7 +785,7 @@ shortest_path_edgelist_creator<-function(graph_subset=T,rank_subgraph=2,file_pat
   ## Loading the igraph object for whole river network
   load(file = paste0(file_path,"common_files_modified/igraph_river_whole.RData"))
   ## Getting the vertex IDs for the projected node IDs
-  projected_vertex_ids<-which(V(igraph_river_whole)$name%in%projected_nodeIDs_vec)
+  projected_vertex_ids<-which(igraph::V(igraph_river_whole)$name%in%projected_nodeIDs_vec)
   
   ## Loading 1) igraph object for whole network "igraph_river_whole" 2) "graph order" giving the vector of indices with decreasing size of most connected clusters 3) "igraph_river_decomposed_list" as a list of igraph objects corresponding to connected subgraphs
   #load(file = paste0(file_path,"common_files_modified/igraph_river_whole.RData"))
@@ -804,11 +804,11 @@ shortest_path_edgelist_creator<-function(graph_subset=T,rank_subgraph=2,file_pat
   ## Loop to create the shortest path objects and shortest_path_edgelist for the 20 vertex ids corresponding to given segment to all other vertex ids
   for(i in 1:length(analyte_polluter_projected_vertex_ids)){
     ptm<-proc.time()
-    short_path<-shortest_paths(graph = igraph_river_whole,from=analyte_polluter_projected_vertex_ids[i], to= analyte_polluter_projected_vertex_ids[-i],mode = "out",output = "vpath")
+    short_path<-igraph::shortest_paths(graph = igraph_river_whole,from=analyte_polluter_projected_vertex_ids[i], to= analyte_polluter_projected_vertex_ids[-i],mode = "out",output = "vpath")
     ## Trimming the paths with length 0 and storing all paths (among nodeIDs) in a list
     edge_list_index[[i]]<-lapply(X = short_path$vpath,FUN = function(x){
-      if(length(as_ids(x))>0){
-        y<-as_ids(x)
+      if(length(igraph::as_ids(x))>0){
+        y<-igraph::as_ids(x)
         return(y)
       }
     })
@@ -832,7 +832,7 @@ shortest_path_edgelist_creator_parallelized<-function(segment_index,file_path){
   #load(file = paste0(file_path,"common_files_modified/graph_order.RData"))
   #load(file = paste0(file_path,"common_files_modified/igraph_river_decomposed_list.RData"))
   ## Getting the vertex IDs for the projected node IDs
-  projected_vertex_ids<-which(V(igraph_river_whole)$name%in%projected_nodeIDs_vec)
+  projected_vertex_ids<-which(igraph::V(igraph_river_whole)$name%in%projected_nodeIDs_vec)
   ## Combining the analyte and polluter vertex ids
   analyte_polluter_projected_vertex_ids<-sort(unique(c(analyte_vertex_ids,polluter_vertex_ids,projected_vertex_ids)))
   ## Defining the segment length and vertex_ids_segments
@@ -849,11 +849,11 @@ shortest_path_edgelist_creator_parallelized<-function(segment_index,file_path){
   ## Loop to create the shortest path objects and shortest_path_edgelist for the 20 vertex ids corresponding to given segment to all other vertex ids
   if(segment_index!=length(segment_start_indices)){
     for(i in 1:segment_length){
-      short_path<-shortest_paths(graph = igraph_river_whole,from=analyte_polluter_projected_vertex_ids[segment_start_indices[segment_index]+(i-1)], to= analyte_polluter_projected_vertex_ids[-(segment_start_indices[segment_index]+(i-1))],mode = "out",output = "vpath")
+      short_path<-igraph::shortest_paths(graph = igraph_river_whole,from=analyte_polluter_projected_vertex_ids[segment_start_indices[segment_index]+(i-1)], to= analyte_polluter_projected_vertex_ids[-(segment_start_indices[segment_index]+(i-1))],mode = "out",output = "vpath")
       ## Trimming the paths with length 0 and storing all paths (among nodeIDs) in a list
       edge_list_index[[i]]<-lapply(X = short_path$vpath,FUN = function(x){
-        if(length(as_ids(x))>0){
-          y<-as_ids(x)
+        if(length(igraph::as_ids(x))>0){
+          y<-igraph::as_ids(x)
           return(y)
         }
       })
@@ -862,11 +862,11 @@ shortest_path_edgelist_creator_parallelized<-function(segment_index,file_path){
   }else{
     if((length(analyte_polluter_projected_vertex_ids)%%segment_length)>0){
       for(i in 1:(length(analyte_polluter_projected_vertex_ids)%%segment_length)){
-        short_path<-shortest_paths(graph = igraph_obj,from=analyte_polluter_projected_vertex_ids[segment_start_indices[segment_index]+(i-1)], to= analyte_polluter_projected_vertex_ids[-(segment_start_indices[segment_index]+(i-1))],mode = "out",output = "vpath")
+        short_path<-igraph::shortest_paths(graph = igraph_obj,from=analyte_polluter_projected_vertex_ids[segment_start_indices[segment_index]+(i-1)], to= analyte_polluter_projected_vertex_ids[-(segment_start_indices[segment_index]+(i-1))],mode = "out",output = "vpath")
         ## Trimming the paths with length 0 and storing all paths (among nodeIDs) in a list
         edge_list_index[[i]]<-lapply(X = short_path$vpath,FUN = function(x){
-          if(length(as_ids(x))>0){
-            y<-as_ids(x)
+          if(length(igraph::as_ids(x))>0){
+            y<-igraph::as_ids(x)
             return(y)
           }
         })
@@ -890,7 +890,7 @@ shortest_path_edgelist_creator_parallelized_2<-function(n_chunks,file_path){
   ## Loading the igraph object for whole river network
   load(file = paste0(file_path,"common_files_modified/igraph_river_whole.RData"))
   ## Getting the vertex IDs for the projected node IDs
-  projected_vertex_ids<-which(V(igraph_river_whole)$name%in%projected_nodeIDs_vec)
+  projected_vertex_ids<-which(igraph::V(igraph_river_whole)$name%in%projected_nodeIDs_vec)
   
   ## Combining the analyte, polluter and projected vertex ids
   analyte_polluter_projected_vertex_ids<-sort(unique(c(analyte_vertex_ids,polluter_vertex_ids,projected_vertex_ids)))
@@ -907,11 +907,11 @@ shortest_path_edgelist_creator_parallelized_2<-function(n_chunks,file_path){
   ## Loop to create the shortest path objects and shortest_path_edgelist for the 20 vertex ids corresponding to given segment to all other vertex ids
   for(i in 1:length(current_indices)){
     #ptm<-proc.time()
-    short_path<-shortest_paths(graph = igraph_river_whole,from=analyte_polluter_projected_vertex_ids[current_indices[i]], to= analyte_polluter_projected_vertex_ids[-current_indices[i]],mode = "out",output = "vpath")
+    short_path<-igraph::shortest_paths(graph = igraph_river_whole,from=analyte_polluter_projected_vertex_ids[current_indices[i]], to= analyte_polluter_projected_vertex_ids[-current_indices[i]],mode = "out",output = "vpath")
     ## Trimming the paths with length 0 and storing all paths (among nodeIDs) in a list
     edge_list_index[[i]]<-lapply(X = short_path$vpath,FUN = function(x){
-      if(length(as_ids(x))>0){
-        y<-as_ids(x)
+      if(length(igraph::as_ids(x))>0){
+        y<-igraph::as_ids(x)
         return(y)
       }
     })
@@ -954,7 +954,7 @@ anpoll_network_creator <- function(output_path){
 #######################################################################################################
 ########################################################################################################
 ## Defining a wrapper function to calculate flow distance of all polluter nodes in parallel
-wrapper_flow_dist_cal <- function(df_polluter,anpoll_edgelist, shortest_path_anpoll_edgelist, total_edgelist_character_modified, from_indicator, to_indicator, file_path){
+wrapper_flow_dist_cal <- function(index,df_polluter,anpoll_edgelist, shortest_path_anpoll_edgelist, total_edgelist_character_modified, from_indicator, to_indicator, file_path){
   ## Defining a function to calculate between a test node and a current node. The current nodes are usually polluter nodes.
   flow_dist_cal<-function(anpoll_edgelist, shortest_path_anpoll_edgelist, total_edgelist_character_modified, test_node_ID, current_node_ID, from_indicator, to_indicator, file_path){
     ## Getting the edge row ID
@@ -1200,12 +1200,12 @@ polluter_test_dist_time <- function(df_polluter, polluter_lon, polluter_lat, pol
       if(analyte_indicator){
         listID_i<-which(listID_nodeID_matrix[,2]==from_nodeIDs[i])
         ## Getting all upstream observations
-        row_ids_date_interval_total<-which(between((list_analyte_time[[listID_i]]$date), date_start, date_end))
+        row_ids_date_interval_total<-which(dplyr::between((list_analyte_time[[listID_i]]$date), date_start, date_end))
         if(length(row_ids_date_interval_total)>0){
           from_obs_total<-c(from_obs_total,list_analyte_time[[listID_i]]$conc[row_ids_date_interval_total])
         }
         ## Getting upstream observations before the spill date
-        row_ids_date_interval_before_spill<-which(between((list_analyte_time[[listID_i]]$date), date_start, spill_date))
+        row_ids_date_interval_before_spill<-which(dplyr::between((list_analyte_time[[listID_i]]$date), date_start, spill_date))
         if(length(row_ids_date_interval_before_spill)>0){
           from_obs_before_spill<-c(from_obs_before_spill,list_analyte_time[[listID_i]]$conc[row_ids_date_interval_before_spill])
         }
@@ -1213,7 +1213,7 @@ polluter_test_dist_time <- function(df_polluter, polluter_lon, polluter_lat, pol
         spill_date_POSIX<-as.POSIXlt(spill_date)
         spill_date_POSIX$year<-spill_date_POSIX$year+1
         spill_date_after1year<-as.Date(spill_date_POSIX)
-        row_ids_date_interval_after_spill<-which(between((list_analyte_time[[listID_i]]$date), spill_date, spill_date_after1year))
+        row_ids_date_interval_after_spill<-which(dplyr::between((list_analyte_time[[listID_i]]$date), spill_date, spill_date_after1year))
         if(length(row_ids_date_interval_after_spill)>0){
           from_obs_after_spill<-c(from_obs_after_spill,list_analyte_time[[listID_i]]$conc[row_ids_date_interval_after_spill])
         }
@@ -1231,12 +1231,12 @@ polluter_test_dist_time <- function(df_polluter, polluter_lon, polluter_lat, pol
         spill_date_POSIX<-as.POSIXlt(spill_date)
         spill_date_POSIX$year<-spill_date_POSIX$year+1
         spill_date_after1year<-as.Date(spill_date_POSIX)
-        row_ids_date_interval_total<-which((between((list_analyte_time[[listID_i]]$date), date_start, date_end))&(between((list_analyte_time[[listID_i]]$date), spill_date, spill_date_after1year)))
+        row_ids_date_interval_total<-which((dplyr::between((list_analyte_time[[listID_i]]$date), date_start, date_end))&(dplyr::between((list_analyte_time[[listID_i]]$date), spill_date, spill_date_after1year)))
         if(length(row_ids_date_interval_total)>0){
           to_obs_total<-c(to_obs_total,list_analyte_time[[listID_i]]$conc[row_ids_date_interval_total])
         }
         ## Getting all downstream observations before the spill date
-        row_ids_date_interval_before_spill<-which(between((list_analyte_time[[listID_i]]$date), date_start, spill_date))
+        row_ids_date_interval_before_spill<-which(dplyr::between((list_analyte_time[[listID_i]]$date), date_start, spill_date))
         if(length(row_ids_date_interval_before_spill)>0){
           to_obs_before_spill <- c(to_obs_before_spill,list_analyte_time[[listID_i]]$conc[row_ids_date_interval_before_spill])
         }
@@ -1244,7 +1244,7 @@ polluter_test_dist_time <- function(df_polluter, polluter_lon, polluter_lat, pol
         spill_date_POSIX<-as.POSIXlt(spill_date)
         spill_date_POSIX$year<-spill_date_POSIX$year+1
         spill_date_after1year<-as.Date(spill_date_POSIX)
-        row_ids_date_interval_after_spill<-which(between((list_analyte_time[[listID_i]]$date), spill_date, spill_date_after1year))
+        row_ids_date_interval_after_spill<-which(dplyr::between((list_analyte_time[[listID_i]]$date), spill_date, spill_date_after1year))
         if(length(row_ids_date_interval_after_spill)>0){
           to_obs_after_spill <- c(to_obs_after_spill,list_analyte_time[[listID_i]]$conc[row_ids_date_interval_after_spill])
         }
@@ -1260,13 +1260,13 @@ polluter_test_dist_time <- function(df_polluter, polluter_lon, polluter_lat, pol
     spill_date_POSIX <- as.POSIXlt(spill_date)
     spill_date_POSIX$year <- spill_date_POSIX$year+1
     spill_date_after1year <- as.Date(spill_date_POSIX)
-    row_ids_date_interval_total <- which((between((list_analyte_time[[listID]]$date), date_start, date_end)) & ((between((list_analyte_time[[listID]]$date), date_start, spill_date_after1year))))
+    row_ids_date_interval_total <- which((dplyr::between((list_analyte_time[[listID]]$date), date_start, date_end)) & ((dplyr::between((list_analyte_time[[listID]]$date), date_start, spill_date_after1year))))
     if(length(row_ids_date_interval_total) > 0){
       to_obs_total <- c(to_obs_total,list_analyte_time[[listID]]$conc[row_ids_date_interval_total])
       #polluter_use_flag<-1
     }
     ## Getting all downstream observations before the spill date
-    row_ids_date_interval_before_spill <- which(between((list_analyte_time[[listID]]$date), date_start, spill_date))
+    row_ids_date_interval_before_spill <- which(dplyr::between((list_analyte_time[[listID]]$date), date_start, spill_date))
     if(length(row_ids_date_interval_before_spill) > 0){
       to_obs_before_spill <- c(to_obs_before_spill,list_analyte_time[[listID]]$conc[row_ids_date_interval_before_spill])
     }
@@ -1274,7 +1274,7 @@ polluter_test_dist_time <- function(df_polluter, polluter_lon, polluter_lat, pol
     spill_date_POSIX <- as.POSIXlt(spill_date)
     spill_date_POSIX$year <- spill_date_POSIX$year + 1
     spill_date_after1year <- as.Date(spill_date_POSIX)
-    row_ids_date_interval_after_spill <- which(between((list_analyte_time[[listID]]$date), spill_date, spill_date_after1year))
+    row_ids_date_interval_after_spill <- which(dplyr::between((list_analyte_time[[listID]]$date), spill_date, spill_date_after1year))
     if(length(row_ids_date_interval_after_spill) > 0){
       to_obs_after_spill <- c(to_obs_after_spill,list_analyte_time[[listID]]$conc[row_ids_date_interval_after_spill])
     }

@@ -75,7 +75,7 @@ tail(df_anpoll_preprocessed)
 
 ## tallying the number of polluter sources
 # df_anpoll_preprocessed %>% as_tibble() %>% group_by(anpoll_indicator) %>% summarise(n = n())
-summarise(n=n(),data=group_by(anpoll_indicator, as_tibble(df_anpoll_preprocessed)))
+#  summarise(group_by(as_tibble(df_anpoll_preprocessed), anpoll_indicator), n())
 ## saving this dataframe
 save(df_anpoll_preprocessed, file = paste0(file_path,"anpoll_files/df_anpoll_preprocessed.RData"))
 
@@ -125,7 +125,7 @@ load(file = paste0(file_path,"polluter_files/df_polluter_nodeID_aggregated.RData
     str(df_anpoll_processed)
     head(df_anpoll_processed)
     length(unique(df_anpoll_processed$nodeID))
-    distm(x = as.matrix(df_anpoll_processed[1,c("lon","lat")]),y = as.matrix(df_anpoll_processed[1,c("lon_mapped","lat_mapped")]))
+    geosphere::distm(x = as.matrix(df_anpoll_processed[1,c("lon","lat")]),y = as.matrix(df_anpoll_processed[1,c("lon_mapped","lat_mapped")]))
 
     load(file=paste0(file_path,"polluter_files/df_polluter_processed.RData"))
     str(df_polluter_processed)
@@ -265,7 +265,7 @@ nrow(df_polluter_processed)
      cl <- makeCluster(39)
      registerDoParallel(cl)
      flow_dist_from_list<-foreach (index = 1:nrow(df_polluter_nodeID_aggregated_rank_subgaph))%dopar% {
-         wrapper_flow_dist_cal(df_polluter=df_polluter_nodeID_aggregated_rank_subgaph,anpoll_edgelist = anpoll_edgelist, shortest_path_anpoll_edgelist = shortest_path_anpoll_edgelist, total_edgelist_character_modified = total_edgelist_character_modified, from_indicator = T, to_indicator = F, file_path = file_path)
+         wrapper_flow_dist_cal(index=index, df_polluter=df_polluter_nodeID_aggregated_rank_subgaph,anpoll_edgelist = anpoll_edgelist, shortest_path_anpoll_edgelist = shortest_path_anpoll_edgelist, total_edgelist_character_modified = total_edgelist_character_modified, from_indicator = T, to_indicator = F, file_path = file_path)
      }
      stopCluster(cl)
      names(flow_dist_from_list)<-df_polluter_nodeID_aggregated_rank_subgaph$nodeID
@@ -276,7 +276,7 @@ nrow(df_polluter_processed)
      cl <- makeCluster(39)
      registerDoParallel(cl)
      flow_dist_to_list<-foreach (index = 1:nrow(df_polluter_nodeID_aggregated_rank_subgaph))%dopar% {
-         wrapper_flow_dist_cal(df_polluter=df_polluter_nodeID_aggregated_rank_subgaph,anpoll_edgelist = anpoll_edgelist, shortest_path_anpoll_edgelist = shortest_path_anpoll_edgelist, total_edgelist_character_modified = total_edgelist_character_modified, from_indicator = F, to_indicator = T, file_path = file_path)
+         wrapper_flow_dist_cal(index=index, df_polluter=df_polluter_nodeID_aggregated_rank_subgaph,anpoll_edgelist = anpoll_edgelist, shortest_path_anpoll_edgelist = shortest_path_anpoll_edgelist, total_edgelist_character_modified = total_edgelist_character_modified, from_indicator = F, to_indicator = T, file_path = file_path)
      }
      stopCluster(cl)
      names(flow_dist_to_list)<-df_polluter_nodeID_aggregated_rank_subgaph$nodeID
@@ -294,7 +294,7 @@ nrow(df_polluter_processed)
      ## flow_dist_from_list_polluters <- foreach (index = 1:nrow(df_polluter_nodeID_aggregated)) %dopar%{
      flow_dist_from_list_polluters <- foreach (index = 1:nrow(df_polluter_nodeID_aggregated), .packages="Rcpp", .noexport = "getDistance") %do% {
 
-         sourceCpp('flow_dist_cal_cpp.cpp')
+         #sourceCpp( paste0(file_path, "code/flow_dist_cal_cpp.cpp") )
          wrapper_flow_dist_cal(index, df_polluter = df_polluter_nodeID_aggregated,
                                anpoll_edgelist = anpoll_edgelist,
                                shortest_path_anpoll_edgelist = shortest_path_anpoll_edgelist,
