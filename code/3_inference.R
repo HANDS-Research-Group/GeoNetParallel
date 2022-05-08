@@ -13,7 +13,8 @@ load(file = paste0(file_path,"inference/flow_dist_from_list_projected.RData"))
 
 flow_dist_polluter_projected_list <- flow_dist_polluter_projected_cal(file_path)
 
-
+load(file = paste0(file_path,"anpoll_files/anpoll_edgelist.RData"))
+load(file = paste0(file_path,"polluter_files/projected_nodeIDs_list.RData"))
 ## Defining the downstream_threshold_dist_km lower and upper
                                         #downstream_threshold_dist_km<-matrix(c(0,10,10,50),2,2,byrow=TRUE)
 df_threshold_dist_km <- data.frame("polluter_intersection" = numeric(),"upstream" = numeric(), "downstream_lower" = numeric(),"downstream_upper" = numeric())
@@ -22,8 +23,6 @@ df_threshold_dist_km[1,] <- c(5, 5, 0, 10)
 df_threshold_dist_km[2,] <- c(45, 5, 0, 50)
 
 for(j in 1:2) {
-  
-  
   ########################################################################################################
   
   load(file = paste0(file_path,"polluter_files/df_polluter_processed.RData"))
