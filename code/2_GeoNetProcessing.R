@@ -51,7 +51,7 @@ head(df_analyte_preprocessed)
 
 ###################################################
 ## Preprocessing the polluter dataframe
-df_polluter_raw<-read.csv(file = paste0(file_path,"data/Pollution_Site_R_Package.csv"))
+df_polluter_raw<-read.csv(file = paste0(file_path,"data/Pollution_Site_R_Package_missing_1.csv"))
 str(df_polluter_raw)
 
 ## Preprocessing the analyte dataframe
@@ -199,12 +199,12 @@ chunk_size <- ceiling(length(analyte_polluter_projected_vertex_ids)/n_chunks)
 indices_all <- 1:length(analyte_polluter_projected_vertex_ids)
 indices_chunk_list <- split(x = indices_all, ceiling(seq_along(indices_all)/chunk_size))
 
-cl <- makeCluster(spec = n_chunks)
-registerDoParallel(cl)
+cl <- parallel::makeCluster(spec = n_chunks)
+doParallel::registerDoParallel(cl)
 shortest_path_anpoll_edgelist_chunk <- foreach (index = 1:n_chunks)%dopar% {
     shortest_path_edgelist_creator_parallelized_2(n_chunks=n_chunks,file_path = file_path)
 }
-stopCluster(cl)
+parallel::stopCluster(cl)
 
 shortest_path_anpoll_edgelist <- unlist(x = shortest_path_anpoll_edgelist_chunk,recursive = F)
 
@@ -262,23 +262,23 @@ nrow(df_polluter_processed)
      row.names(df_polluter_nodeID_aggregated_rank_subgaph)<-NULL
      ## Getting the flow dist from list
      flow_dist_from_list<-list()
-     cl <- makeCluster(39)
-     registerDoParallel(cl)
+     cl <- parallel::makeCluster(39)
+     doParallel::registerDoParallel(cl)
      flow_dist_from_list<-foreach (index = 1:nrow(df_polluter_nodeID_aggregated_rank_subgaph))%dopar% {
          wrapper_flow_dist_cal(index=index, df_polluter=df_polluter_nodeID_aggregated_rank_subgaph,anpoll_edgelist = anpoll_edgelist, shortest_path_anpoll_edgelist = shortest_path_anpoll_edgelist, total_edgelist_character_modified = total_edgelist_character_modified, from_indicator = T, to_indicator = F, file_path = file_path)
      }
-     stopCluster(cl)
+     parallel::stopCluster(cl)
      names(flow_dist_from_list)<-df_polluter_nodeID_aggregated_rank_subgaph$nodeID
      save(flow_dist_from_list,file = paste0(file_path,"inference/flow_dist_from_list.RData"))
      print("from_list is done")
      ## Getting the flow dist to list
      flow_dist_to_list<-list()
-     cl <- makeCluster(39)
-     registerDoParallel(cl)
+     cl <- parallel::makeCluster(39)
+     doParallel::registerDoParallel(cl)
      flow_dist_to_list<-foreach (index = 1:nrow(df_polluter_nodeID_aggregated_rank_subgaph))%dopar% {
          wrapper_flow_dist_cal(index=index, df_polluter=df_polluter_nodeID_aggregated_rank_subgaph,anpoll_edgelist = anpoll_edgelist, shortest_path_anpoll_edgelist = shortest_path_anpoll_edgelist, total_edgelist_character_modified = total_edgelist_character_modified, from_indicator = F, to_indicator = T, file_path = file_path)
      }
-     stopCluster(cl)
+     parallel::stopCluster(cl)
      names(flow_dist_to_list)<-df_polluter_nodeID_aggregated_rank_subgaph$nodeID
      save(flow_dist_to_list,file = paste0(file_path,"inference/flow_dist_to_list.RData"))
  }else{
@@ -289,8 +289,8 @@ nrow(df_polluter_processed)
      print("From_list_polluter started")
 
      ## Uncomment the following section
-     # cl <- makeCluster(30)
-     # registerDoParallel(cl)
+     # cl <- parallel::makeCluster(30)
+     # doParallel::registerDoParallel(cl)
      ## flow_dist_from_list_polluters <- foreach (index = 1:nrow(df_polluter_nodeID_aggregated)) %dopar%{
      sourceCpp( paste0(file_path, "code/flow_dist_cal_cpp.cpp") )
      flow_dist_from_list_polluters <- foreach (index = 1:nrow(df_polluter_nodeID_aggregated), .packages="Rcpp", .noexport = "getDistance") %do% {
@@ -304,7 +304,7 @@ nrow(df_polluter_processed)
                                from_indicator = T, to_indicator = F, flow_type = "flow_from",
                                file_path = file_path)
      }
-     # stopCluster(cl)
+     # parallel::stopCluster(cl)
      print(length(flow_dist_from_list_polluters))
      print(length(df_polluter_nodeID_aggregated$nodeID))
      names(flow_dist_from_list_polluters)<-df_polluter_nodeID_aggregated$nodeID
@@ -318,8 +318,8 @@ nrow(df_polluter_processed)
      df_projected_nodeIDs<-data.frame("nodeID"=projected_nodeIDs_vec,stringsAsFactors = F)
      flow_dist_from_list_projected<-list()
 
-     # cl <- makeCluster(50)
-     # registerDoParallel(cl)
+     # cl <- parallel::makeCluster(50)
+     # doParallel::registerDoParallel(cl)
     sourceCpp( paste0(file_path, "code/flow_dist_cal_cpp.cpp") )
      flow_dist_from_list_projected<-foreach (index =1:nrow(df_projected_nodeIDs), .packages="Rcpp", .noexport = "getDistance")%do% {
          sourceCpp('flow_dist_cal_cpp.cpp')
@@ -331,7 +331,7 @@ nrow(df_polluter_processed)
                                flow_type = "flow_projected",
                                file_path = file_path)
      }
-     # stopCluster(cl)
+     # parallel::stopCluster(cl)
 
      print("from_list_projected is done")
      print(length(projected_nodeIDs_vec))
@@ -355,8 +355,8 @@ nrow(df_polluter_processed)
      flow_dist_to_list  <- vector(mode="list", length=length( df_polluter_nodeID_aggregated))
 
      ## Actual Code
-     # cl <- makeCluster(30)
-     # registerDoParallel(cl)
+     # cl <- parallel::makeCluster(30)
+     # doParallel::registerDoParallel(cl)
      sourceCpp( paste0(file_path, "code/flow_dist_cal_cpp.cpp") )
      flow_dist_to_list<-foreach (index = 1:nrow(df_polluter_nodeID_aggregated), .packages="Rcpp", .noexport = "getDistance")%do% {
          sourceCpp('flow_dist_cal_cpp.cpp')
@@ -368,7 +368,7 @@ nrow(df_polluter_processed)
                                from_indicator = F, to_indicator = T,
                                flow_type = "flow_to", file_path = file_path)
      }
-     # stopCluster(cl)
+     # parallel::stopCluster(cl)
 
      names(flow_dist_to_list)<-df_polluter_nodeID_aggregated$nodeID
      print(" flow_dist_to_list is done")

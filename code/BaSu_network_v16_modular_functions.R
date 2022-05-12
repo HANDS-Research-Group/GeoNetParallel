@@ -1098,7 +1098,13 @@ from_nodeIDs_crawler<-function(nodeID,upstream_threshold_dist_km,file_path){
 polluter_test_dist_time <- function(df_polluter, polluter_lon, polluter_lat, polluter_projected_dist_km, upstream_threshold_dist_km, downstream_threshold_lower_dist_km, downstream_threshold_upper_dist_km, date_start, date_end, spill_date, file_path){
   ## Extracting polluter node ID from the dataframe given the polluter latlong
   polluter_node_ID<-unique(df_polluter$nodeID[which((df_polluter$lon_mapped==polluter_lon)&(df_polluter$lat_mapped==polluter_lat))])[1]
-  
+  load(file = paste0(file_path, "anpoll_files/anpoll_edgelist.RData"))
+  load(file = paste0(file_path, "polluter_files/projected_nodeIDs_list.RData"))
+  load(file = paste0(file_path,"inference/flow_dist_from_list.RData"))
+  ## Loading the "flow_dist_to_list"
+  load(file = paste0(file_path,"inference/flow_dist_to_list.RData"))
+  load(file = paste0(file_path,"inference/flow_dist_from_list_projected.RData"))
+  flow_dist_polluter_projected_list <- flow_dist_polluter_projected_cal(file_path)
   ####################################################
   ## Collecting all to nodes that are directed from the polluter_nodeID
   to_edgelist_ids_total<-which(anpoll_edgelist[,1]==polluter_node_ID)
@@ -1310,7 +1316,7 @@ polluter_test_dist_time <- function(df_polluter, polluter_lon, polluter_lat, pol
         p_value_t.test_1sided_upstream <- t.test(x = from_obs_before_spill, y = from_obs_after_spill, alternative = "less")$p.value
       }
       #p_value_wilcox.test_2sided<-wilcox.test(x = from_obs_total,y = to_obs_total)$p.value
-      if(class(try(wilcox.test(x = from_obs_before_spill, y = from_obs_after_spill,alternative = "less")$p.value)) == "try-error"){
+      if(class(try(wilcox.test(x = from_obs_before_spill, y = from_obs_after_spill,alternative = "less", exact=F)$p.value)) == "try-error"){
         p_value_wilcox.test_1sided_upstream <- wilcox.test(x = c((from_obs_before_spill[1] + 0.01), from_obs_before_spill[-1]), y = c((from_obs_after_spill[1] + 0.01), from_obs_after_spill[-1]), alternative = "less")$p.value
       }else{
         p_value_wilcox.test_1sided_upstream <- wilcox.test(x = from_obs_before_spill, y = from_obs_after_spill,alternative = "less")$p.value
@@ -1675,7 +1681,7 @@ wrapper_polluter_test <- function(index, n_chunks, file_path){
     ## Loading the appended polluter processed with county info.
     load(file = paste0(file_path,"polluter_files/df_polluter_processed.RData"),envir = .GlobalEnv)
     
-    df_polluter_processed[nrow(df_polluter_processed)+1, ] = df_polluter_processed[nrow(df_polluter_processed), ]
+    # df_polluter_processed[nrow(df_polluter_processed)+1, ] = df_polluter_processed[nrow(df_polluter_processed), ]
   
     ####################################################
     

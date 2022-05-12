@@ -28,7 +28,7 @@ for(j in 1:2) {
   load(file = paste0(file_path,"polluter_files/df_polluter_processed.RData"))
   print(length(df_polluter_processed))
   dir.create(path = paste0(file_path,"inference/test_results"))
-  n_chunks <- 5
+  n_chunks <- 2
   #chunk_size<-ceiling(12/n_chunks)
   chunk_size <- ceiling(nrow(df_polluter_processed)/n_chunks)
   #indices_all<-1:12
