@@ -371,7 +371,8 @@ two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path){
   ## Load df_anpoll_processed
   load(paste0(output_path,"anpoll_files/df_anpoll_processed.RData"))
   row.names(df_anpoll_preprocessed)<-NULL
-
+  
+  df_anpoll_preprocessed$anpoll_indicator <- "analyte"
   ## Append df_anpoll_processed with df_anpoll_preprocessed
   df_anpoll_processed<-rbind(df_anpoll_processed,df_anpoll_preprocessed)
     
@@ -879,7 +880,7 @@ shortest_path_edgelist_creator_parallelized<-function(segment_index,file_path){
 }
 
 ## Writing a function (used later in foreach) to create shortest path edgelist and creating the network for analyte-polluter. Inputs are  1) analyte and polluter nodeID aggregated dataframes "df_analyte_nodeID_aggregated" and "df_polluter_nodeID_aggregated" 2) directory path where output files should be stored at. Output shortest path edgelist
-shortest_path_edgelist_creator_parallelized_2<-function(n_chunks,file_path){
+shortest_path_edgelist_creator_parallelized_2<-function(index, n_chunks,file_path){
   library(igraph)
   ## Loading the analyte and polluter vertex ids
   load(file = paste0(file_path,"analyte_files/analyte_vertex_ids.RData"))

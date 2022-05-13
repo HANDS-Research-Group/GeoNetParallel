@@ -7,8 +7,8 @@ file_path <- "C:/GeoNet/GeoNet_2021_packageDataset/"
 source(file = paste0(file_path, "code/BaSu_network_v16_modular_functions.R"))
 
 inference <- function() {
-    source(file = paste0(file_path, "code/inference.R"))
-    source(file = paste0(file_path, "code/fdr.R"))
+    source(file = paste0(file_path, "code/3_inference.R"))
+    source(file = paste0(file_path, "code/4_fdr.R"))
 }
 # The following function takes in as input the inference output on all
 # the polluter sites already present in GeoNet and a dataframe with
@@ -118,34 +118,52 @@ add_temporal_polluter <- function(df_polluter_to_append_file_path) {
 }
 
 add_temporal_analyte <- function(df_analyte_to_append_filepath) {
-    load(file = paste0(file_path, "analyte_files/df_anpoll_processed.RData"))
+    load(file = paste0(file_path, "anpoll_files/df_anpoll_processed.RData"))
     df_analyte_to_append <- read.csv(df_analyte_to_append_filepath)
 
     names(df_analyte_to_append) <- c("conc", "lon", "lat", "date")
-    
+    df_analyte_to_append$date <- as.Date(df_analyte_to_append$date, format = "%m/%d/%y")
+
     df_analyte_to_append$anpoll_indicator <- "analyte"
     df_analyte_to_append$lon_mapped <- NA
     df_analyte_to_append$lat_mapped <- NA
     df_analyte_to_append$nodeID <- NA
 
-    
+    df_analyte_to_append$lon_mapped <- df_anpoll_processed$lon_mapped[which(df_anpoll_processed$lon==df_analyte_to_append$lon &
+                                                                            df_anpoll_processed$lat==df_analyte_to_append$lat &
+                                                                            df_anpoll_processed$date==df_analyte_to_append$date)[1]]
+    df_analyte_to_append$lat_mapped <- df_anpoll_processed$lat_mapped[which(df_anpoll_processed$lon==df_analyte_to_append$lon &
+                                                                            df_anpoll_processed$lat==df_analyte_to_append$lat &
+                                                                            df_anpoll_processed$date==df_analyte_to_append$date)[1]]
+    df_analyte_to_append$nodeID <- df_anpoll_processed$nodeID[which(df_anpoll_processed$lon==df_analyte_to_append$lon &
+                                                                    df_anpoll_processed$lat==df_analyte_to_append$lat)[1]]
+
+    df_anpoll_processed <- rbind(df_anpoll_processed, df_analyte_to_append)
+    save(df_anpoll_processed, file = paste0(file_path, "anpoll_files/df_anpoll_processed.RData"))
+
+    df_analyte_to_append <- df_anpoll_processed[which(df_anpoll_processed$anpoll_indicator=="analyte"),]
+    df_list_analyte_obj <- df_list_analyte_generator(df_analyte_to_append, file_path)
+
+    inference()
 }
 
 ## Function takes the dataframe with new temporal analyte information
 ## and re-runs the inference for all polluter sites
 add_new_analyte <- function(df_analyte_to_append_filepath) {
-    load(file = paste0(file_path, "analyte_files/df_anpoll_processed.RData"))
+    load(file = paste0(file_path, "anpoll_files/df_anpoll_processed.RData"))
     df_analyte_to_append <- read.csv(df_analyte_to_append_filepath)
 
     names(df_analyte_to_append) <- c("conc", "lon", "lat", "date")
 
     df_analyte_to_append$date <- as.Date(df_analyte_to_append$date, format = "%m/%d/%y")
-    df_analyte_to_append$anpoll_indicator <- NA
-    df_anpoll_processed  <- rbind(df_anpoll_processed, df_analyte_to_append)
+
+    two_step_anpoll_mapper_list <- two_step_anpoll_mapper_update(df_anpoll_preprocessed = df_analyte_to_append, 
+                                                                output_path = file_path)
+    load(file = paste0(file_path,"analyte_files/df_analyte_nodeID_aggregated.RData"))
+    graph_subset_indicator <- F
     df_list_analyte_obj <- df_list_analyte_generator(df_analyte_processed = df_anpoll_processed[which(df_anpoll_processed$anpoll_indicator=="analyte"),],output_path = file_path)
 
     analyte_vertex_ids <- vertex_IDs_generator(df_anpoll_nodeID_aggregated = df_analyte_nodeID_aggregated,output_path = file_path,analyte=T,polluter=F,graph_subset=graph_subset_indicator)
-
 
     ########################################################################################################
     ## Creating shortest path edgelist by defining the segments and epochs and running in parallel 6 segments in each epoch with foreach
@@ -162,19 +180,23 @@ add_new_analyte <- function(df_analyte_to_append_filepath) {
 
     ## Combining the analyte, polluter and projected vertex ids
     analyte_polluter_projected_vertex_ids <- sort(unique(c(analyte_vertex_ids,polluter_vertex_ids,projected_vertex_ids)))
-
+    
+    ## Sourcing the modular functions for analysis
+    
     ## Defining number of chunks to be parallelized, chunk size and indices inside each chunk
-    n_chunks <- 4
+    n_chunks <- 2
     chunk_size <- ceiling(length(analyte_polluter_projected_vertex_ids)/n_chunks)
     indices_all <- 1:length(analyte_polluter_projected_vertex_ids)
     indices_chunk_list <- split(x = indices_all, ceiling(seq_along(indices_all)/chunk_size))
 
-    cl <- parallel::makeCluster(spec = n_chunks)
-    doParallel::registerDoParallel(cl)
-    shortest_path_anpoll_edgelist_chunk <- foreach (index = 1:n_chunks)%dopar% {
-        shortest_path_edgelist_creator_parallelized_2(n_chunks=n_chunks,file_path = file_path)
+    #cl <- parallel::makeCluster(spec = n_chunks)
+    #doParallel::registerDoParallel(cl)
+    shortest_path_anpoll_edgelist_chunk <- foreach (index = 1:n_chunks)%do% {
+      source(file = paste0(file_path, "code/BaSu_network_v16_modular_functions.R"))
+      file_path <- "C:/GeoNet/GeoNet_2021_packageDataset/"
+      shortest_path_edgelist_creator_parallelized_2(index=index, n_chunks=n_chunks,file_path = file_path)
     }
-    parallel::stopCluster(cl)
+    #parallel::stopCluster(cl)
 
     shortest_path_anpoll_edgelist <- unlist(x = shortest_path_anpoll_edgelist_chunk,recursive = F)
 
@@ -205,5 +227,6 @@ add_temporal_analyte_polluter <- function(df_analyte_to_append_filepath, df_poll
 
 
 df_polluter_to_append_file_path<- paste0(file_path,"data/Pulltion_Site_temporal.csv")
+df_analyte_to_append_filepath <- paste0(file_path,"data/Water_chemistry_new.csv")
 
 add_temporal_polluter(df_polluter_to_append_file_path)

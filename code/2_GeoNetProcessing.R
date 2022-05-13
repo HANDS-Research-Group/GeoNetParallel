@@ -34,7 +34,7 @@ shapefile_pre_processing_list <- shapefile_pre_processing(shape_obj = shape,outp
 
 ###############################################################################################
 ## Loading the preprocessed analyte dataframe
-specCond <- read.csv(file = paste0(file_path, 'data/Water_Chemistry_R_Package.csv'))
+specCond <- read.csv(file = paste0(file_path, 'data/Water_Chemistry_R_Package_missing.csv'))
 df_analyte_preprocessed = specCond[,c(1, 2, 3, 4)]
 names(df_analyte_preprocessed) <- c("conc", "lon", "lat", "date")
 
@@ -51,7 +51,7 @@ head(df_analyte_preprocessed)
 
 ###################################################
 ## Preprocessing the polluter dataframe
-df_polluter_raw<-read.csv(file = paste0(file_path,"data/Pollution_Site_R_Package_missing_1.csv"))
+df_polluter_raw<-read.csv(file = paste0(file_path,"data/Pollution_Site_R_Package.csv"))
 str(df_polluter_raw)
 
 ## Preprocessing the analyte dataframe
@@ -202,7 +202,7 @@ indices_chunk_list <- split(x = indices_all, ceiling(seq_along(indices_all)/chun
 cl <- parallel::makeCluster(spec = n_chunks)
 doParallel::registerDoParallel(cl)
 shortest_path_anpoll_edgelist_chunk <- foreach (index = 1:n_chunks)%dopar% {
-    shortest_path_edgelist_creator_parallelized_2(n_chunks=n_chunks,file_path = file_path)
+    shortest_path_edgelist_creator_parallelized_2(index=index, n_chunks=n_chunks,file_path = file_path)
 }
 parallel::stopCluster(cl)
 
