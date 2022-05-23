@@ -237,6 +237,8 @@ two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path){
   load(file = paste0(output_path,"common_files/total_edgelist_character.RData"))
   ## Loading the "stream_list" from common files
   load(file = paste0(output_path,"common_files/stream_list.RData"))
+
+  load(file=paste0(output_path,"common_files_modified/df_node_latlong_modified.RData"))
   ###################################################
   ## Defining a function to create node mid stream and update everything in the global environment
   mid_stream_node_creator<-function(){
@@ -283,14 +285,14 @@ two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path){
   ## Initializing a new stream_list that contains path information (latlong) of the two new streams created for all sample sites after mapping
   stream_list_modified<-stream_list
   ## Initializing the dataframe "df_node_latlong_modified"
-  df_node_latlong_modified<-df_node_latlong
+  df_node_latlong_modified<-df_node_latlong_modified
   ## Initializing the nodeID column for finally mapped nodes in the dataframe "df_anpoll_preprocessed"
   df_anpoll_preprocessed$nodeID<-NA
   df_anpoll_preprocessed$lon_mapped<-NA
   df_anpoll_preprocessed$lat_mapped<-NA
   
   ## Initializing the vector dist_mapped to calculate distances between original latlong of C-PP locations and mapped latlong on river streams
-  dist_mapped<-rep(NA_real_,nrow(df_anpoll_preprocessed))
+  dist_mapped_to_append<-rep(NA_real_,nrow(df_anpoll_preprocessed))
   ## Initializing the new node counter to count the number of new nodes created
   new_node_counter<-0
   ## Initializing the flag to count how many times a stream was broken
@@ -362,11 +364,13 @@ two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path){
     }
     ##%>%addCircleMarkers(lng = dist_to_stream[,2],lat = dist_to_stream[,3], radius = 4,color = "yellow")
     if(df_anpoll_preprocessed$lat_mapped[i]>90) { df_anpoll_preprocessed$lat_mapped[i] = 90}
-    dist_mapped[i]<-geosphere::distm(x = df_anpoll_preprocessed[i,c("lon","lat")],y = df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")])
+    dist_mapped_to_append[i]<-geosphere::distm(x = df_anpoll_preprocessed[i,c("lon","lat")],y = df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")])
     #print(i)
   }
   ## stopCluster(cl)
   ## Saving the mapped distances vector
+  load(file=paste0(output_path, "anpoll_files/dist_mapped.RData"))
+  dist_mapped <- rbind(dist_mapped, dist_mapped_to_append)
   save(dist_mapped,file=paste0(output_path,"anpoll_files/dist_mapped.RData"))
   ## Load df_anpoll_processed
   load(paste0(output_path,"anpoll_files/df_anpoll_processed.RData"))
@@ -385,6 +389,7 @@ two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path){
   save(df_polluter_processed,file=paste0(file_path,"polluter_files/df_polluter_processed.RData"))
   ###################################################
   ## Saving the modified 1st MOST IMPORTANT dataframe df_node_latlong, modified total_character_edgelist and modified stream_list
+  
   save(df_node_latlong_modified,file=paste0(output_path,"common_files_modified/df_node_latlong_modified.RData"))
   total_edgelist_character_modified<-as.matrix(total_edgelist_character_modified)
   save(total_edgelist_character_modified,file=paste0(output_path,"common_files_modified/total_edgelist_character_modified.RData"))
@@ -1646,7 +1651,7 @@ wrapper_flow_dist_cal <- function(index, df_polluter,anpoll_edgelist, shortest_p
 ########################################################################################################
 ## Inference function 
 
-wrapper_polluter_test <- function(index, n_chunks, file_path){
+wrapper_polluter_test <- function(index, n_chunks, file_path, j){
     ## Loading required libraries
     library(geosphere)
     library(network)
@@ -1680,7 +1685,7 @@ wrapper_polluter_test <- function(index, n_chunks, file_path){
     ## ## Loading the distances of polluters to projected nodes
     ## load(file=paste0(file_path,"polluter_files/flow_dist_polluter_projected_list.RData"),envir = .GlobalEnv)
     ## Loading the appended polluter processed with county info.
-    load(file = paste0(file_path,"polluter_files/df_polluter_processed.RData"),envir = .GlobalEnv)
+    load(file = paste0(file_path,"polluter_files/df_polluter_processed.RData"))
     
     # df_polluter_processed[nrow(df_polluter_processed)+1, ] = df_polluter_processed[nrow(df_polluter_processed), ]
   
@@ -1718,7 +1723,7 @@ wrapper_polluter_test <- function(index, n_chunks, file_path){
     return(test_result_chunk_list)
   }
   
-  wrapper_polluter_test_update <- function(index, n_chunks, df_polluter_to_append, file_path){
+  wrapper_polluter_test_update <- function(index, n_chunks, df_polluter_to_append, file_path, j){
     ## Loading required libraries
     library(geosphere)
     library(network)
@@ -1752,9 +1757,9 @@ wrapper_polluter_test <- function(index, n_chunks, file_path){
     ## ## Loading the distances of polluters to projected nodes
     ## load(file=paste0(file_path,"polluter_files/flow_dist_polluter_projected_list.RData"),envir = .GlobalEnv)
     ## Loading the appended polluter processed with county info.
-    load(file = paste0(file_path,"polluter_files/df_polluter_processed.RData"),envir = .GlobalEnv)
+    load(file = paste0(file_path,"polluter_files/df_polluter_processed.RData"))
     
-    df_polluter_processed_to_append[nrow(df_polluter_processed_to_append)+1, ] = df_polluter_processed_to_append[nrow(df_polluter_processed_to_append), ]
+    # df_polluter_processed_to_append[nrow(df_polluter_processed_to_append)+1, ] = df_polluter_processed_to_append[nrow(df_polluter_processed_to_append), ]
   
     ####################################################
     

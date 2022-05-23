@@ -1,7 +1,7 @@
 library(tidyverse)
 
 ## Update the path to the folder
-file_path <- "C:/GeoNet/GeoNet_2021_packageDataset/"
+file_path <- "C:/Users/rohit/OneDrive - Syracuse University/GeoNet/Repo/GeoNet2022/"
 
 ## Sourcing the modular functions for analysis
 source(file = paste0(file_path, "code/BaSu_network_v16_modular_functions.R"))
@@ -42,7 +42,7 @@ for(j in 2:2) {
   cl <- makeCluster(spec = n_chunks)
   registerDoParallel(cl)
   test_result_list <- foreach (index = 1:n_chunks)%dopar% {
-    wrapper_polluter_test(index=index, n_chunks=n_chunks,file_path = file_path)
+    wrapper_polluter_test(index=index, n_chunks=n_chunks,file_path = file_path, j=j)
   }
   stopCluster(cl)
   
