@@ -69,3 +69,6 @@ downstream concentration values and t-test and wilcoxon test results to denote w
    of the output dataframes after each step
 
 For more information about the code check out https://drive.google.com/file/d/1AFr1qGLGhAfZwWw8E_BCVhmYF6ohJmus/view?usp=sharing
+
+## Contact
+For any questions about the source codes or example datasets, please reach out to Dr. Tao Wen at Syracuse University (https://jaywen.com/)
