@@ -1,4 +1,4 @@
-# GeoNet_2022
+# GeoNet 2022
 
 GeoNet analyzes stream networks to detect statistically significant
 changes between background and potentially impacted sites.
@@ -7,15 +7,11 @@ changes between background and potentially impacted sites.
 
 ## References
 
-Assessing Contamination of Stream Networks near Shale Gas Development
-Using a New Geospatial Tool Amal Agarwal, Tao Wen, Alex Chen, Anna
-Yinqi Zhang, Xianzeng Niu, Xiang Zhan, Lingzhou Xue, and Susan
-L. Brantley _Environmental Science & Technology_ 2020 54 (14),
-8632-8639 DOI: 10.1021/acs.est.9b06761 [Link to
+Agarwal, A., Wen, T., Chen, A., Zhang, A.Y., Niu, X., Zhan, X., Xue, L. and Brantley, S.L., 2020. Assessing contamination of stream networks near shale gas development using a new geospatial tool. Environmental Science & Technology, 54(14), pp.8632-8639. [Link to
 paper](https://pubs.acs.org/doi/10.1021/acs.est.9b06761?fig=tgr1&ref=pdf)
 
 ## Dependencies
-This package was last tested on August 11, 2021. Testing environment is listed below:
+This package was last tested in April 2022. Testing environment is listed below:
 | __Required Package__ | __Version__ |
 |----------------------|-------------|
 | R                    | 4.0.5       |
@@ -73,3 +69,6 @@ downstream concentration values and t-test and wilcoxon test results to denote w
    of the output dataframes after each step
 
 For more information about the code check out https://drive.google.com/file/d/1AFr1qGLGhAfZwWw8E_BCVhmYF6ohJmus/view?usp=sharing
+
+## Contact
+For any questions about the source codes or example datasets, please reach out to Dr. Tao Wen at Syracuse University (https://jaywen.com/)
