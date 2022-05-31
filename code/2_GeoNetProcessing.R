@@ -34,7 +34,7 @@ shapefile_pre_processing_list <- shapefile_pre_processing(shape_obj = shape,outp
 
 ###############################################################################################
 ## Loading the preprocessed analyte dataframe
-specCond <- read.csv(file = paste0(file_path, 'data/Water_Chemistry_R_Package_missing.csv'))
+specCond <- utils::read.csv(file = paste0(file_path, 'data/Water_Chemistry_R_Package_missing.csv'))
 df_analyte_preprocessed = specCond[,c(1, 2, 3, 4)]
 names(df_analyte_preprocessed) <- c("conc", "lon", "lat", "date")
 
@@ -51,7 +51,7 @@ head(df_analyte_preprocessed)
 
 ###################################################
 ## Preprocessing the polluter dataframe
-df_polluter_raw<-read.csv(file = paste0(file_path,"data/Pollution_Site_R_Package.csv"))
+df_polluter_raw<-utils::read.csv(file = paste0(file_path,"data/Pollution_Site_R_Package.csv"))
 str(df_polluter_raw)
 names(df_polluter_raw) <- c("county", "lon", "lat", "date")
 ## Preprocessing the analyte dataframe
@@ -178,7 +178,7 @@ polluter_vertex_ids <- vertex_IDs_generator(df_anpoll_nodeID_aggregated = df_pol
 projected_nodeIDs_list <- projected_nodeIDs_list_generator(file_path=file_path, projected_threshold_dist_km = 50)
 
 ########################################################################################################
-## Creating shortest path edgelist by defining the segments and epochs and running in parallel 6 segments in each epoch with foreach
+## Creating shortest path edgelist by defining the segments and epochs and running in parallel 6 segments in each epoch with foreach::foreach
 
 ## Loading the analyte and polluter vertex ids
 load(file = paste0(file_path,"analyte_files/analyte_vertex_ids.RData"))
@@ -201,7 +201,7 @@ indices_chunk_list <- split(x = indices_all, ceiling(seq_along(indices_all)/chun
 
 cl <- parallel::makeCluster(spec = n_chunks)
 doParallel::registerDoParallel(cl)
-shortest_path_anpoll_edgelist_chunk <- foreach (index = 1:n_chunks)%dopar% {
+shortest_path_anpoll_edgelist_chunk <- foreach::foreach (index = 1:n_chunks)%dopar% {
     shortest_path_edgelist_creator_parallelized_2(index=index, n_chunks=n_chunks,file_path = file_path)
 }
 parallel::stopCluster(cl)
@@ -264,7 +264,7 @@ nrow(df_polluter_processed)
      flow_dist_from_list<-list()
      cl <- parallel::makeCluster(39)
      doParallel::registerDoParallel(cl)
-     flow_dist_from_list<-foreach (index = 1:nrow(df_polluter_nodeID_aggregated_rank_subgaph))%dopar% {
+     flow_dist_from_list<-foreach::foreach (index = 1:nrow(df_polluter_nodeID_aggregated_rank_subgaph))%dopar% {
          wrapper_flow_dist_cal(index=index, df_polluter=df_polluter_nodeID_aggregated_rank_subgaph,anpoll_edgelist = anpoll_edgelist, shortest_path_anpoll_edgelist = shortest_path_anpoll_edgelist, total_edgelist_character_modified = total_edgelist_character_modified, from_indicator = T, to_indicator = F, file_path = file_path)
      }
      parallel::stopCluster(cl)
@@ -275,7 +275,7 @@ nrow(df_polluter_processed)
      flow_dist_to_list<-list()
      cl <- parallel::makeCluster(39)
      doParallel::registerDoParallel(cl)
-     flow_dist_to_list<-foreach (index = 1:nrow(df_polluter_nodeID_aggregated_rank_subgaph))%dopar% {
+     flow_dist_to_list<-foreach::foreach (index = 1:nrow(df_polluter_nodeID_aggregated_rank_subgaph))%dopar% {
          wrapper_flow_dist_cal(index=index, df_polluter=df_polluter_nodeID_aggregated_rank_subgaph,anpoll_edgelist = anpoll_edgelist, shortest_path_anpoll_edgelist = shortest_path_anpoll_edgelist, total_edgelist_character_modified = total_edgelist_character_modified, from_indicator = F, to_indicator = T, file_path = file_path)
      }
      parallel::stopCluster(cl)
@@ -291,9 +291,9 @@ nrow(df_polluter_processed)
      ## Uncomment the following section
      ## cl <- parallel::makeCluster(2)
      ## doParallel::registerDoParallel(cl)
-     ##flow_dist_from_list_polluters <- foreach (index = 1:nrow(df_polluter_nodeID_aggregated)) %dopar%{
+     ##flow_dist_from_list_polluters <- foreach::foreach (index = 1:nrow(df_polluter_nodeID_aggregated)) %dopar%{
      sourceCpp( paste0(file_path, "code/flow_dist_cal_cpp.cpp") , env=environment())
-     flow_dist_from_list_polluters <- foreach (index = 1:nrow(df_polluter_nodeID_aggregated), .packages="Rcpp", .noexport = "getDistance") %do% {
+     flow_dist_from_list_polluters <- foreach::foreach (index = 1:nrow(df_polluter_nodeID_aggregated), .packages="Rcpp", .noexport = "getDistance") %do% {
          source(file = paste0(file_path, "code/BaSu_network_v16_modular_functions.R"), local=T)   
          sourceCpp( paste0(file_path, "code/flow_dist_cal_cpp.cpp"), env=environment() )
          wrapper_flow_dist_cal(index, df_polluter = df_polluter_nodeID_aggregated,
@@ -321,7 +321,7 @@ nrow(df_polluter_processed)
      ## cl <- parallel::makeCluster(2)
      ## doParallel::registerDoParallel(cl)
      sourceCpp( paste0(file_path, "code/flow_dist_cal_cpp.cpp") , env=environment())
-     flow_dist_from_list_projected<-foreach (index =1:nrow(df_projected_nodeIDs), .packages="Rcpp", .noexport = "getDistance")%do% {
+     flow_dist_from_list_projected<-foreach::foreach (index =1:nrow(df_projected_nodeIDs), .packages="Rcpp", .noexport = "getDistance")%do% {
          source(file = paste0(file_path, "code/BaSu_network_v16_modular_functions.R"), local=T)
          wrapper_flow_dist_cal(index, df_polluter=df_projected_nodeIDs,
                                anpoll_edgelist = anpoll_edgelist,
@@ -358,7 +358,7 @@ nrow(df_polluter_processed)
      ## cl <- parallel::makeCluster(2)
      ## doParallel::registerDoParallel(cl)
      sourceCpp( paste0(file_path, "code/flow_dist_cal_cpp.cpp") )
-     flow_dist_to_list<-foreach (index = 1:nrow(df_polluter_nodeID_aggregated), .packages="Rcpp", .noexport = "getDistance")%do% {
+     flow_dist_to_list<-foreach::foreach (index = 1:nrow(df_polluter_nodeID_aggregated), .packages="Rcpp", .noexport = "getDistance")%do% {
          source(file = paste0(file_path, "code/BaSu_network_v16_modular_functions.R"), local=T)
          wrapper_flow_dist_cal(index, df_polluter= df_polluter_nodeID_aggregated,
                                anpoll_edgelist = anpoll_edgelist,

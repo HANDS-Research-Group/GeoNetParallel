@@ -418,7 +418,7 @@ stream_path_dist_cal<-function(output_path){
 ## Writing a function which takes inputs as preprocessed dataframe for analyte "df_analyte_preprocessed" and directory path where output file should be stored at and gives output as the 2nd MOST IMPORTANT dataframe
 df_list_analyte_generator<-function(df_analyte_processed,output_path){
   ## Taking mean of observations with duplicate node IDs
-  df_analyte_nodeID_aggregated<-aggregate(df_analyte_processed[,c("lon_mapped","lat_mapped","conc")], by=list(df_analyte_processed$nodeID),FUN=mean, na.rm=TRUE)
+  df_analyte_nodeID_aggregated<-stats::aggregate(df_analyte_processed[,c("lon_mapped","lat_mapped","conc")], by=list(df_analyte_processed$nodeID),FUN=mean, na.rm=TRUE)
   names(df_analyte_nodeID_aggregated)[1]<-"nodeID"
   ## Saving the dataframe "df_analyte_nodeID_aggregated"
   save(df_analyte_nodeID_aggregated,file = paste0(output_path,"analyte_files/df_analyte_nodeID_aggregated.RData"))
@@ -442,7 +442,7 @@ df_list_analyte_generator<-function(df_analyte_processed,output_path){
 ## Writing a function which takes inputs as preprocessed dataframe for polluter "df_polluter_preprocessed" and directory path where output file should be stored at and gives output as the 3rd MOST IMPORTANT dataframe
 df_polluter_generator<-function(df_polluter_processed,output_path){
   ## Taking mean of observations with duplicate node IDs
-  df_polluter_nodeID_aggregated<-aggregate(df_polluter_processed[,c("lon_mapped","lat_mapped")], by=list(df_polluter_processed$nodeID),FUN=mean, na.rm=TRUE)
+  df_polluter_nodeID_aggregated<-stats::aggregate(df_polluter_processed[,c("lon_mapped","lat_mapped")], by=list(df_polluter_processed$nodeID),FUN=mean, na.rm=TRUE)
   names(df_polluter_nodeID_aggregated)[1]<-"nodeID"
   names(df_polluter_nodeID_aggregated)<-c("nodeID","lon_mapped","lat_mapped")
   ## Saving the dataframe "df_polluter_nodeID_aggregated"
@@ -1299,7 +1299,7 @@ polluter_test_dist_time <- function(df_polluter, polluter_lon, polluter_lat, pol
     from_median_before_spill <- NA
   }else{
     from_mean_before_spill <- mean(from_obs_before_spill)
-    from_median_before_spill <- median(from_obs_before_spill)
+    from_median_before_spill <- stats::median(from_obs_before_spill)
   }
   from_n_before_spill <- length(from_obs_before_spill)
   
@@ -1309,23 +1309,23 @@ polluter_test_dist_time <- function(df_polluter, polluter_lon, polluter_lat, pol
     from_median_after_spill <- NA
   }else{
     from_mean_after_spill <- mean(from_obs_after_spill)
-    from_median_after_spill <- median(from_obs_after_spill)
+    from_median_after_spill <- stats::median(from_obs_after_spill)
   }
   from_n_after_spill <- length(from_obs_after_spill)
   ####################################################
   if((from_n_before_spill > 0) & (from_n_after_spill > 0)){
     mean_diff <- from_mean_after_spill - from_mean_before_spill
     if((from_n_before_spill > 1) & (from_n_after_spill > 1)){
-      if(class(try(t.test(x = from_obs_before_spill, y = from_obs_after_spill,alternative = "less")$p.value))=="try-error"){
-        p_value_t.test_1sided_upstream <- t.test(x = c((from_obs_before_spill[1] + 0.01), from_obs_before_spill[-1]), y = c((from_obs_after_spill[1] + 0.01), from_obs_after_spill[-1]), alternative = "less")$p.value
+      if(class(try(stats::t.test(x = from_obs_before_spill, y = from_obs_after_spill,alternative = "less")$p.value))=="try-error"){
+        p_value_t.test_1sided_upstream <- stats::t.test(x = c((from_obs_before_spill[1] + 0.01), from_obs_before_spill[-1]), y = c((from_obs_after_spill[1] + 0.01), from_obs_after_spill[-1]), alternative = "less")$p.value
       }else{
-        p_value_t.test_1sided_upstream <- t.test(x = from_obs_before_spill, y = from_obs_after_spill, alternative = "less")$p.value
+        p_value_t.test_1sided_upstream <- stats::t.test(x = from_obs_before_spill, y = from_obs_after_spill, alternative = "less")$p.value
       }
       #p_value_wilcox.test_2sided<-wilcox.test(x = from_obs_total,y = to_obs_total)$p.value
-      if(class(try(wilcox.test(x = from_obs_before_spill, y = from_obs_after_spill,alternative = "less", exact=F)$p.value)) == "try-error"){
-        p_value_wilcox.test_1sided_upstream <- wilcox.test(x = c((from_obs_before_spill[1] + 0.01), from_obs_before_spill[-1]), y = c((from_obs_after_spill[1] + 0.01), from_obs_after_spill[-1]), alternative = "less")$p.value
+      if(class(try(stats::wilcox.test(x = from_obs_before_spill, y = from_obs_after_spill,alternative = "less", exact=F)$p.value)) == "try-error"){
+        p_value_wilcox.test_1sided_upstream <- stats::wilcox.test(x = c((from_obs_before_spill[1] + 0.01), from_obs_before_spill[-1]), y = c((from_obs_after_spill[1] + 0.01), from_obs_after_spill[-1]), alternative = "less")$p.value
       }else{
-        p_value_wilcox.test_1sided_upstream <- wilcox.test(x = from_obs_before_spill, y = from_obs_after_spill,alternative = "less")$p.value
+        p_value_wilcox.test_1sided_upstream <- stats::wilcox.test(x = from_obs_before_spill, y = from_obs_after_spill,alternative = "less")$p.value
       }
       
       test_pass_upstream <- 1
@@ -1350,7 +1350,7 @@ polluter_test_dist_time <- function(df_polluter, polluter_lon, polluter_lat, pol
     to_median_before_spill <- NA
   }else{
     to_mean_before_spill <- mean(to_obs_before_spill)
-    to_median_before_spill <- median(to_obs_before_spill)
+    to_median_before_spill <- stats::median(to_obs_before_spill)
   }
   to_n_before_spill <- length(to_obs_before_spill)
   
@@ -1360,24 +1360,24 @@ polluter_test_dist_time <- function(df_polluter, polluter_lon, polluter_lat, pol
     to_median_after_spill <- NA
   }else{
     to_mean_after_spill <- mean(to_obs_after_spill)
-    to_median_after_spill <- median(to_obs_after_spill)
+    to_median_after_spill <- stats::median(to_obs_after_spill)
   }
   to_n_after_spill <- length(to_obs_after_spill)
   ####################################################
   if((to_n_before_spill > 0) & (to_n_after_spill > 0)){
     mean_diff <- to_mean_after_spill - to_mean_before_spill
     if((to_n_before_spill > 1) & (to_n_after_spill > 1)){
-      if(class(try(t.test(x = to_obs_before_spill,y = to_obs_after_spill,alternative = "less")$p.value)) == "try-error"){
-        p_value_t.test_1sided_downstream <- t.test(x = c((to_obs_before_spill[1] + 0.01), to_obs_before_spill[-1]), y = c((to_obs_after_spill[1] + 0.01), to_obs_after_spill[-1]), alternative = "less")$p.value
+      if(class(try(stats::t.test(x = to_obs_before_spill,y = to_obs_after_spill,alternative = "less")$p.value)) == "try-error"){
+        p_value_t.test_1sided_downstream <- stats::t.test(x = c((to_obs_before_spill[1] + 0.01), to_obs_before_spill[-1]), y = c((to_obs_after_spill[1] + 0.01), to_obs_after_spill[-1]), alternative = "less")$p.value
       }else{
-        p_value_t.test_1sided_downstream <- t.test(x = to_obs_before_spill,y = to_obs_after_spill,alternative = "less")$p.value
+        p_value_t.test_1sided_downstream <- stats::t.test(x = to_obs_before_spill,y = to_obs_after_spill,alternative = "less")$p.value
       }
       
       #p_value_wilcox.test_2sided<-wilcox.test(x = from_obs_total,y = to_obs_total)$p.value
       if(class(try(wilcox.test(x = to_obs_before_spill,y = to_obs_after_spill,alternative = "less")$p.value)) == "try-error"){
-        p_value_wilcox.test_1sided_downstream <- wilcox.test(x = c((to_obs_before_spill[1] + 0.01), to_obs_before_spill[-1]), y = c((to_obs_after_spill[1] + 0.01), to_obs_after_spill[-1]), alternative = "less")$p.value
+        p_value_wilcox.test_1sided_downstream <- stats::wilcox.test(x = c((to_obs_before_spill[1] + 0.01), to_obs_before_spill[-1]), y = c((to_obs_after_spill[1] + 0.01), to_obs_after_spill[-1]), alternative = "less")$p.value
       }else{
-        p_value_wilcox.test_1sided_downstream <- wilcox.test(x = to_obs_before_spill, y = to_obs_after_spill, alternative = "less")$p.value
+        p_value_wilcox.test_1sided_downstream <- stats::wilcox.test(x = to_obs_before_spill, y = to_obs_after_spill, alternative = "less")$p.value
       }
       test_pass_downstream <- 1
     }else{
@@ -1403,7 +1403,7 @@ polluter_test_dist_time <- function(df_polluter, polluter_lon, polluter_lat, pol
     from_median_total <- NA
   }else{
     from_mean_total <- mean(from_obs_total)
-    from_median_total <- median(from_obs_total)
+    from_median_total <- stats::median(from_obs_total)
   }
   from_n_total <- length(from_obs_total)
   
@@ -1413,34 +1413,34 @@ polluter_test_dist_time <- function(df_polluter, polluter_lon, polluter_lat, pol
     to_median_total <- NA
   }else{
     to_mean_total <- mean(to_obs_total)
-    to_median_total <- median(to_obs_total)
+    to_median_total <- stats::median(to_obs_total)
   }
   to_n_total <- length(to_obs_total)
   ####################################################
   if((from_n_total > 0) & (to_n_after_spill > 0)){
     mean_diff <- to_mean_after_spill - from_mean_total
     if((from_n_total > 1) & (to_n_after_spill > 1)){
-        if(class(try(t.test(x = from_obs_total, y = to_obs_after_spill,alternative = "less")$p.value,
+        if(class(try(stats::t.test(x = from_obs_total, y = to_obs_after_spill,alternative = "less")$p.value,
                      silent = T)) == "try-error"){
-            p_value_t.test_1sided_total <- t.test(x = c(from_obs_total[1] + 0.01, from_obs_total[-1]),
+            p_value_t.test_1sided_total <- stats::t.test(x = c(from_obs_total[1] + 0.01, from_obs_total[-1]),
                                                   y = c(to_obs_after_spill[1] + 0.01, to_obs_after_spill[-1]),
                                                   alternative = "less")$p.value
         }else{
-            p_value_t.test_1sided_total <- t.test(x = from_obs_total, y = to_obs_after_spill,
+            p_value_t.test_1sided_total <- stats::t.test(x = from_obs_total, y = to_obs_after_spill,
                                                   alternative = "less")$p.value
         }
       #p_value_wilcox.test_2sided<-wilcox.test(x = from_obs_total,y = to_obs_total)$p.value
         if(class(try(wilcox.test(x = from_obs_total,
                                  y = to_obs_after_spill,
                                  alternative = "less")$p.value)) == "try-error"){
-            p_value_wilcox.test_1sided_total <- wilcox.test(x = c((from_obs_total[
+            p_value_wilcox.test_1sided_total <- stats::wilcox.test(x = c((from_obs_total[
                                                                       1] + 0.01), from_obs_total[-1]),
                                                             y = c((to_obs_after_spill[
                                                                       1] + 0.01),
                                                                   to_obs_after_spill[-1]),
                                                             alternative = "less")$p.value
         }else{
-            p_value_wilcox.test_1sided_total <- wilcox.test(x = from_obs_total,
+            p_value_wilcox.test_1sided_total <- stats::wilcox.test(x = from_obs_total,
                                                             y = to_obs_after_spill,
                                                             alternative = "less")$p.value
         }
@@ -1651,7 +1651,7 @@ wrapper_flow_dist_cal <- function(index, df_polluter,anpoll_edgelist, shortest_p
 ########################################################################################################
 ## Inference function 
 
-wrapper_polluter_test <- function(index, n_chunks, file_path, j){
+wrapper_polluter_test <- function(index, n_chunks, file_path, j, df_threshold_dist_km){
     ## Loading required libraries
     library(geosphere)
     library(network)
@@ -1723,7 +1723,7 @@ wrapper_polluter_test <- function(index, n_chunks, file_path, j){
     return(test_result_chunk_list)
   }
   
-  wrapper_polluter_test_update <- function(index, n_chunks, df_polluter_to_append, file_path, j){
+  wrapper_polluter_test_update <- function(index, n_chunks, df_polluter_to_append, file_path, j, df_threshold_dist_km){
     ## Loading required libraries
     library(geosphere)
     library(network)

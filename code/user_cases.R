@@ -20,7 +20,7 @@ add_temporal_polluter <- function(df_polluter_to_append_file_path) {
     df_threshold_dist_km[1,] <- c(5, 5, 0, 10)
     df_threshold_dist_km[2,] <- c(45, 5, 0, 50)
 
-    df_polluter_raw<-read.csv(file = df_polluter_to_append_file_path)
+    df_polluter_raw<-utils::read.csv(file = df_polluter_to_append_file_path)
     str(df_polluter_raw)
 
     ## Preprocessing the analyte dataframe
@@ -119,7 +119,7 @@ add_temporal_polluter <- function(df_polluter_to_append_file_path) {
 
 add_temporal_analyte <- function(df_analyte_to_append_filepath) {
     load(file = paste0(file_path, "anpoll_files/df_anpoll_processed.RData"))
-    df_analyte_to_append <- read.csv(df_analyte_to_append_filepath)
+    df_analyte_to_append <- utils::read.csv(df_analyte_to_append_filepath)
 
     names(df_analyte_to_append) <- c("conc", "lon", "lat", "date")
     df_analyte_to_append$date <- as.Date(df_analyte_to_append$date, format = "%m/%d/%y")
@@ -151,7 +151,7 @@ add_temporal_analyte <- function(df_analyte_to_append_filepath) {
 ## and re-runs the inference for all polluter sites
 add_new_analyte <- function(df_analyte_to_append_filepath) {
     
-    df_analyte_to_append <- read.csv(df_analyte_to_append_filepath)
+    df_analyte_to_append <- utils::read.csv(df_analyte_to_append_filepath)
 
     names(df_analyte_to_append) <- c("conc", "lon", "lat", "date")
 
@@ -178,7 +178,7 @@ add_new_analyte <- function(df_analyte_to_append_filepath) {
     ## Loading the igraph object for whole river network
     load(file = paste0(file_path,"common_files_modified/igraph_river_whole.RData"))
     ## Getting the vertex IDs for the projected node IDs
-    projected_vertex_ids <- which(V(igraph_river_whole)$name%in%projected_nodeIDs_vec)
+    projected_vertex_ids <- which(igrpah::V(igraph_river_whole)$name%in%projected_nodeIDs_vec)
 
     ## Combining the analyte, polluter and projected vertex ids
     analyte_polluter_projected_vertex_ids <- sort(unique(c(analyte_vertex_ids,polluter_vertex_ids,projected_vertex_ids)))
@@ -269,7 +269,7 @@ add_new_analyte <- function(df_analyte_to_append_filepath) {
 }
 
 add_new_polluter <- function(df_polluter_to_append_file_path) {
-    df_polluter_raw<-read.csv(file = df_polluter_to_append_file_path)
+    df_polluter_raw<-utils::read.csv(file = df_polluter_to_append_file_path)
     str(df_polluter_raw)
     names(df_polluter_raw) <- c("county", "lon", "lat", "date")
     ## Preprocessing the analyte dataframe

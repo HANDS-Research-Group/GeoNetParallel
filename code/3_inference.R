@@ -39,12 +39,12 @@ for(j in 2:2) {
   
   ## index=1
   ## wrapper_polluter_test(n_chunks=n_chunks,file_path = file_path)
-  cl <- makeCluster(spec = n_chunks)
-  registerDoParallel(cl)
+  cl <- parallel::makeCluster(spec = n_chunks)
+  doParallel::registerDoParallel(cl)
   test_result_list <- foreach (index = 1:n_chunks)%dopar% {
-    wrapper_polluter_test(index=index, n_chunks=n_chunks,file_path = file_path, j=j)
+    wrapper_polluter_test(index=index, n_chunks=n_chunks,file_path = file_path, j=j, df_threshold_dist_km = df_threshold_dist_km)
   }
-  stopCluster(cl)
+  parallel::stopCluster(cl)
   
   df_polluter_processed_appended  <- df_polluter_processed
   polluter_test_matrix <- data.frame(matrix(NA, nrow(df_polluter_processed), 15))
