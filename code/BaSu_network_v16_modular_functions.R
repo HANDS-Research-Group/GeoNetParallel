@@ -1868,6 +1868,9 @@ wrapper_polluter_test <- function(index, n_chunks, file_path, j, df_threshold_di
     ####################################################
     ## Recreating chunk information
     #chunk_size<-ceiling(12/n_chunks)
+    if(n_chunks>nrow(df_polluter_processed)){
+        n_chunks<-nrow(df_polluter_processed)
+    }
     chunk_size <- ceiling(nrow(df_polluter_processed)/n_chunks)
     #indices_all<-1:12
     indices_all <- 1:nrow(df_polluter_processed)
@@ -1940,6 +1943,9 @@ wrapper_polluter_test <- function(index, n_chunks, file_path, j, df_threshold_di
     ####################################################
     ## Recreating chunk information
     #chunk_size<-ceiling(12/n_chunks)
+    if(n_chunks>nrow(df_polluter_processed_to_append)){
+        n_chunks<-nrow(df_polluter_processed_to_append)
+    }
     chunk_size <- ceiling(nrow(df_polluter_processed_to_append)/n_chunks)
     #indices_all<-1:12
     indices_all <- 1:nrow(df_polluter_processed_to_append)
