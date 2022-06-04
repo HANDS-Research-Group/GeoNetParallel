@@ -158,7 +158,7 @@ add_new_analyte <- function(df_analyte_to_append_filepath) {
     df_analyte_to_append$date <- as.Date(df_analyte_to_append$date, format = "%m/%d/%y")
 
     two_step_anpoll_mapper_list <- two_step_anpoll_mapper_update(df_anpoll_preprocessed = df_analyte_to_append, 
-                                                                output_path = file_path)
+                                                                output_path = file_path, file_path = file_path)
 
     load(file = paste0(file_path, "anpoll_files/df_anpoll_processed.RData"))
     load(file = paste0(file_path,"analyte_files/df_analyte_nodeID_aggregated.RData"))
@@ -277,8 +277,8 @@ add_new_polluter <- function(df_polluter_to_append_file_path) {
     df_polluter_preprocessed$date<-as.Date(df_polluter_raw$date,format="%m/%d/%Y")
         
     load(file=paste0(file_path,"polluter_files/df_polluter_processed.RData"))
-    two_step_anpoll_mapper_list <- two_step_anpoll_mapper_update(df_anpoll_preprocessed = df_analyte_to_append, 
-                                                                output_path = file_path)
+    two_step_anpoll_mapper_list <- two_step_anpoll_mapper_update_polluter(df_anpoll_preprocessed = df_polluter_preprocessed, 
+                                                                output_path = file_path, file_path = file_path)
 
     load(file = paste0(file_path, "anpoll_files/df_anpoll_processed.RData"))
     load(file = paste0(file_path,"analyte_files/df_analyte_nodeID_aggregated.RData"))
@@ -428,7 +428,7 @@ add_new_polluter <- function(df_polluter_to_append_file_path) {
     flow_dist_from_list <- append(flow_dist_from_list_polluters,flow_dist_from_list_projected)
     # Saving the flow distance from list
     save(flow_dist_from_list,file = paste0(file_path,"inference/flow_dist_from_list.RData"))
-    
+    inference()
 }
 ## The following function to add both analyte and polluter together at a time.
 add_temporal_analyte_polluter <- function(df_analyte_to_append_filepath, df_polluter_to_append_file_path) {
@@ -437,7 +437,8 @@ add_temporal_analyte_polluter <- function(df_analyte_to_append_filepath, df_poll
 }
 
 
-df_polluter_to_append_file_path<- paste0(file_path,"data/Pulltion_Site_temporal.csv")
+df_polluter_to_append_file_path<- paste0(file_path,"data/Pollution_Site_R_Package_new.csv")
 df_analyte_to_append_filepath <- paste0(file_path,"data/Water_chemistry_new.csv")
 
-add_new_analyte(df_analyte_to_append_filepath)
+# add_new_analyte(df_analyte_to_append_filepath)
+add_new_polluter(df_polluter_to_append_file_path)

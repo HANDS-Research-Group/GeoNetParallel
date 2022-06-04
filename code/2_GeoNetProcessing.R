@@ -34,7 +34,7 @@ shapefile_pre_processing_list <- shapefile_pre_processing(shape_obj = shape,outp
 
 ###############################################################################################
 ## Loading the preprocessed analyte dataframe
-specCond <- utils::read.csv(file = paste0(file_path, 'data/Water_Chemistry_R_Package_missing.csv'))
+specCond <- utils::read.csv(file = paste0(file_path, 'data/Water_Chemistry_R_Package.csv'))
 df_analyte_preprocessed = specCond[,c(1, 2, 3, 4)]
 names(df_analyte_preprocessed) <- c("conc", "lon", "lat", "date")
 

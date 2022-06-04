@@ -70,7 +70,7 @@ shapefile_pre_processing<-function(shape_obj,output_path){
 
 ########################################################################################################
 ## Writing a function for a two step mapping procedure of all C-PP locations by mapping them to nearest nodes in the base network or dividing the streams and creating new nodes. The 1st main goal is to add these mapped node IDs to the dataframe "df_anpoll_preprocessed" and return that as first argument. The 2nd main goal of this function is to modify all the preprocessed river network files ("df_node_latlong", "total_edgelist_character" and "stream_list") based on this finalized mapping. Inputs are 1) preprocessed dataframe for anpoll "df_anpoll_preprocessed" and 2) directory path where output file should be stored at and outputs 1) df_anpoll_preprocessed with additional column node ID and 2) all outputs same as shapefile_pre_processing but all of them modified
-two_step_anpoll_mapper<-function(df_anpoll_preprocessed,output_path){
+two_step_anpoll_mapper<-function(df_anpoll_preprocessed,output_path, file_path){
   ## Loading the dataframe "df_node_latlong" from common files
   load(file = paste0(output_path,"common_files/df_node_latlong.RData"))
   ## Loading the "total_edgelist_character" from common files
@@ -83,7 +83,7 @@ two_step_anpoll_mapper<-function(df_anpoll_preprocessed,output_path){
     flag_mid<<-flag_mid+1
     #print(paste0("flag_mid = ",flag_mid))
     ## Creating new node correspoding to this mapping over stream
-    new_node_ID<<-as.character(max(as.numeric(df_node_latlong_modified[,1]))+1)
+    new_node_ID<-as.character(max(as.numeric(df_node_latlong_modified[,1]))+1)
     ## Updating new node counter
     new_node_counter<<-new_node_counter+1
     ## Appending the "df_anpoll_preprocessed" with node_ID, lon_mapped and lat_mapped
@@ -112,9 +112,9 @@ two_step_anpoll_mapper<-function(df_anpoll_preprocessed,output_path){
   ## Defining a function to map to node end of the stream and just update df_anpoll_preprocessed in the global environment
   end_stream_node_mapper<-function(){
     ## Appending the "df_anpoll_preprocessed" with node_ID, lon_mapped and lat_mapped
-    column_ID<<-if(order(dist_to_points)[1]==1) 1 else 2
+    column_ID<-if(order(dist_to_points)[1]==1) 1 else 2
     df_anpoll_preprocessed[i,"nodeID"]<<-as.matrix(total_edgelist_character_modified)[stream_ID_anpoll_selected,column_ID]
-    temp_ID<<-if(order(dist_to_points)[1]==1) 1 else length(dist_to_points)
+    temp_ID<-if(order(dist_to_points)[1]==1) 1 else length(dist_to_points)
     df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")]<<-stream_sub_df[stream_selected_row_IDs[temp_ID],c(1,2)]
   }
   ###################################################
@@ -171,13 +171,13 @@ two_step_anpoll_mapper<-function(df_anpoll_preprocessed,output_path){
         coincide_condition<-prod((as.numeric(stream_sub_df[stream_selected_row_IDs[1],c(1,2)])==as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])))
         if(!is.nan(angle_CPP_1_2)){
           if((angle_CPP_1_2>=90)|(coincide_condition)){
-            end_stream_node_mapper()
+            end_stream_node_mapper( )
           }else{
             mid_stream_node_creator()
           }
         }else{
           if(coincide_condition){
-            end_stream_node_mapper()
+            end_stream_node_mapper( )
           }else{
             mid_stream_node_creator()
           }
@@ -188,13 +188,13 @@ two_step_anpoll_mapper<-function(df_anpoll_preprocessed,output_path){
         coincide_condition<-prod((as.numeric(stream_sub_df[stream_selected_row_IDs[length(stream_selected_row_IDs)],c(1,2)])==as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])))
         if(!is.nan(angle_CPP_end_1_2)){
           if((angle_CPP_end_1_2>=90)|(coincide_condition)){
-            end_stream_node_mapper()
+            end_stream_node_mapper( )
           }else{
             mid_stream_node_creator()
           }
         }else{
           if(coincide_condition){
-            end_stream_node_mapper()
+            end_stream_node_mapper( )
           }else{
             mid_stream_node_creator()
           }
@@ -230,7 +230,7 @@ two_step_anpoll_mapper<-function(df_anpoll_preprocessed,output_path){
   return(list(df_anpoll_processed,df_node_latlong_modified,total_edgelist_character_modified,stream_list_modified))
 }
 
-two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path){
+two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path, file_path){
   ## Loading the dataframe "df_node_latlong" from common files
   load(file = paste0(output_path,"common_files/df_node_latlong.RData"))
   ## Loading the "total_edgelist_character" from common files
@@ -245,7 +245,7 @@ two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path){
     flag_mid<<-flag_mid+1
     #print(paste0("flag_mid = ",flag_mid))
     ## Creating new node correspoding to this mapping over stream
-    new_node_ID<<-as.character(max(as.numeric(df_node_latlong_modified[,1]))+1)
+    new_node_ID<-as.character(max(as.numeric(df_node_latlong_modified[,1]))+1)
     ## Updating new node counter
     new_node_counter<<-new_node_counter+1
     ## Appending the "df_anpoll_preprocessed" with node_ID, lon_mapped and lat_mapped
@@ -274,9 +274,9 @@ two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path){
   ## Defining a function to map to node end of the stream and just update df_anpoll_preprocessed in the global environment
   end_stream_node_mapper<-function(){
     ## Appending the "df_anpoll_preprocessed" with node_ID, lon_mapped and lat_mapped
-    column_ID<<-if(order(dist_to_points)[1]==1) 1 else 2
+    column_ID<-if(order(dist_to_points)[1]==1) 1 else 2
     df_anpoll_preprocessed[i,"nodeID"]<<-as.matrix(total_edgelist_character_modified)[stream_ID_anpoll_selected,column_ID]
-    temp_ID<<-if(order(dist_to_points)[1]==1) 1 else length(dist_to_points)
+    temp_ID<-if(order(dist_to_points)[1]==1) 1 else length(dist_to_points)
     df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")]<<-stream_sub_df[stream_selected_row_IDs[temp_ID],c(1,2)]
   }
   ###################################################
@@ -370,7 +370,7 @@ two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path){
   ## stopCluster(cl)
   ## Saving the mapped distances vector
   load(file=paste0(output_path, "anpoll_files/dist_mapped.RData"))
-  dist_mapped <- rbind(dist_mapped, dist_mapped_to_append)
+  dist_mapped <- cbind(dist_mapped, dist_mapped_to_append)
   save(dist_mapped,file=paste0(output_path,"anpoll_files/dist_mapped.RData"))
   ## Load df_anpoll_processed
   load(paste0(output_path,"anpoll_files/df_anpoll_processed.RData"))
@@ -396,6 +396,174 @@ two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path){
   save(stream_list_modified,file=paste0(output_path,"common_files_modified/stream_list_modified.RData"))
   return(list(df_anpoll_processed,df_node_latlong_modified,total_edgelist_character_modified,stream_list_modified))
 }
+two_step_anpoll_mapper_update_polluter<-function(df_anpoll_preprocessed, output_path, file_path){
+  ## Loading the dataframe "df_node_latlong" from common files
+  load(file = paste0(output_path,"common_files/df_node_latlong.RData"))
+  ## Loading the "total_edgelist_character" from common files
+  load(file = paste0(output_path,"common_files/total_edgelist_character.RData"))
+  ## Loading the "stream_list" from common files
+  load(file = paste0(output_path,"common_files/stream_list.RData"))
+  
+  load(file=paste0(output_path,"common_files_modified/df_node_latlong_modified.RData"))
+  ###################################################
+  ## Defining a function to create node mid stream and update everything in the global environment
+  mid_stream_node_creator<-function(){
+    flag_mid<<-flag_mid+1
+    #print(paste0("flag_mid = ",flag_mid))
+    ## Creating new node correspoding to this mapping over stream
+    new_node_ID<-as.character(max(as.numeric(df_node_latlong_modified[,1]))+1)
+    ## Updating new node counter
+    new_node_counter<<-new_node_counter+1
+    ## Appending the "df_anpoll_preprocessed" with node_ID, lon_mapped and lat_mapped
+    df_anpoll_preprocessed[i,"nodeID"]<<-new_node_ID
+    df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")]<<-as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])
+    ## Appending the total character edgelist
+    total_edgelist_character_modified[nrow(total_edgelist_character_modified)+1,]<<-c(total_edgelist_character_modified[stream_ID_anpoll_selected,1],new_node_ID,total_edgelist_character_modified[stream_ID_anpoll_selected,3])
+    total_edgelist_character_modified[nrow(total_edgelist_character_modified)+1,]<<-c(new_node_ID,total_edgelist_character_modified[stream_ID_anpoll_selected,2],total_edgelist_character_modified[stream_ID_anpoll_selected,3])
+    ## Deleting the mapped stream from total character edgelist
+    total_edgelist_character_modified<<-total_edgelist_character_modified[-stream_ID_anpoll_selected,]
+    row.names(total_edgelist_character_modified)<<-NULL
+    ## Storing new node ID latlong in the dataframe df_node_latlong_modified
+    df_node_latlong_modified[nrow(df_node_latlong_modified)+1,1]<<-new_node_ID
+    df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)]<<-as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])
+    ## Appending the new stream_list with path information
+    stream_list_modified[[length(stream_list_modified)+1]]<<-as.matrix(rbind(as.matrix(stream_sub_df[stream_selected_row_IDs[1]:stream_selected_row_IDs[min(order(dist_to_points)[c(1,2)])],c(1,2)]),as.numeric(df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)])))
+    row.names(stream_list_modified[[length(stream_list_modified)]])<<-NULL
+    colnames(stream_list_modified[[length(stream_list_modified)]])<<-NULL
+    stream_list_modified[[length(stream_list_modified)+1]]<<-as.matrix(rbind(as.numeric(df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)]),as.matrix(stream_sub_df[stream_selected_row_IDs[max(order(dist_to_points)[c(1,2)])]:stream_selected_row_IDs[length(stream_selected_row_IDs)],c(1,2)])))
+    row.names(stream_list_modified[[length(stream_list_modified)]])<<-NULL
+    colnames(stream_list_modified[[length(stream_list_modified)]])<<-NULL
+    ## Deleting the mapped stream path from stream list
+    stream_list_modified[[stream_ID_anpoll_selected]]<<-NULL
+  }
+  ###################################################
+  ## Defining a function to map to node end of the stream and just update df_anpoll_preprocessed in the global environment
+  end_stream_node_mapper<-function(){
+    ## Appending the "df_anpoll_preprocessed" with node_ID, lon_mapped and lat_mapped
+    column_ID<-if(order(dist_to_points)[1]==1) 1 else 2
+    df_anpoll_preprocessed[i,"nodeID"]<<-as.matrix(total_edgelist_character_modified)[stream_ID_anpoll_selected,column_ID]
+    temp_ID<-if(order(dist_to_points)[1]==1) 1 else length(dist_to_points)
+    df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")]<<-stream_sub_df[stream_selected_row_IDs[temp_ID],c(1,2)]
+  }
+  ###################################################
+  ## Initializing a dataframe for storing edgelist correspoding to new streams created after mapping
+  total_edgelist_character_modified<-data.frame(total_edgelist_character,stringsAsFactors = F)
+  ## Initializing a new stream_list that contains path information (latlong) of the two new streams created for all sample sites after mapping
+  stream_list_modified<-stream_list
+  ## Initializing the dataframe "df_node_latlong_modified"
+  df_node_latlong_modified<-df_node_latlong_modified
+  ## Initializing the nodeID column for finally mapped nodes in the dataframe "df_anpoll_preprocessed"
+  df_anpoll_preprocessed$nodeID<-NA
+  df_anpoll_preprocessed$lon_mapped<-NA
+  df_anpoll_preprocessed$lat_mapped<-NA
+  
+  ## Initializing the vector dist_mapped to calculate distances between original latlong of C-PP locations and mapped latlong on river streams
+  dist_mapped_to_append<-rep(NA_real_,nrow(df_anpoll_preprocessed))
+  ## Initializing the new node counter to count the number of new nodes created
+  new_node_counter<-0
+  ## Initializing the flag to count how many times a stream was broken
+  flag_mid<-0
+  ## Two step mapping loop for each row in df_anpoll_preprocessed; 1st step: Get top ten nearest node IDs, 2nd step: Create new nodes and streams by mapping to the river streams corresponding to top ten nearest node IDs
+  for(i in 1:nrow(df_anpoll_preprocessed)) {
+    dist_vec_step1<-geosphere::distm(x = as.matrix(df_anpoll_preprocessed[i,c("lon","lat")]),y = as.matrix(df_node_latlong_modified[,c("lon","lat")]))
+    ## Getting the top ten nearest node IDs for sampling site i 
+    top_ten_node_IDs_sampling_site_i<-df_node_latlong_modified$nodeID[order(as.vector(dist_vec_step1))[1:10]]
+    ## Getting the stream IDs in the original edgelist which orginate or end in these top ten node IDs
+    stream_IDs_sampling_site_i<-sort(unique(c(which(total_edgelist_character_modified[,1]%in%top_ten_node_IDs_sampling_site_i),which(total_edgelist_character_modified[,2]%in%top_ten_node_IDs_sampling_site_i))))
+    ## Getting a smaller list of streams corresponding to these stream_IDs where each element stores the path information (sequence of lat long) of that stream 
+    stream_sub_list<-stream_list_modified[stream_IDs_sampling_site_i]
+    dist_to_stream<-matrix(NA_real_,nrow = length(stream_sub_list),3)
+    for (j in 1:length(stream_sub_list)){
+      stream_sub_list[[j]]<-data.frame(stream_sub_list[[j]])
+      stream_sub_list[[j]][,3]<-j
+      stream_sub_list[[j]][,4]<-0 ## Initializing start and end flag of stream
+      stream_sub_list[[j]][1,4]<-1 ## Marking the start flag of stream as 1
+      stream_sub_list[[j]][nrow(stream_sub_list[[j]]),4]<-2 ## Marking the start flag of stream as 2
+      dist_to_stream[j,]<-geosphere::dist2Line(p = as.matrix(df_anpoll_preprocessed[i,c("lon","lat")]),line = stream_sub_list[[j]][,c(1,2)])
+    }
+    ## Combining the path information for all these streams in one big dataframe with 3rd column depicting the local stream_ID
+    stream_sub_df<-do.call(what = rbind,args = stream_sub_list)
+    ## stream ID selected corresponding to closest stream from i^th sampling site
+    stream_ID_anpoll_selected<-stream_IDs_sampling_site_i[which.min(dist_to_stream[,1])]
+    ## Row ids in stream_sub_df which corresponds to selected stream
+    stream_selected_row_IDs<-which(stream_sub_df[,3]==which.min(dist_to_stream[,1]))
+    ## Calculating the distance of the i^th C-PP location to all the path latlong in this dataframe to judge whether the shortest distance to the selected stream occurs at midpoint or one of the endpoints
+    dist_to_points<-as.vector(geosphere::distm(x = as.matrix(df_anpoll_preprocessed[i,c("lon","lat")]), y = as.matrix(stream_sub_df[stream_selected_row_IDs,c(1,2)])))
+    if(order(dist_to_points)[1]%in%c(1,length(dist_to_points))){
+      if(order(dist_to_points)[1]==1){
+        dist_12<-as.numeric(geosphere::distm(x = as.matrix(stream_sub_df[stream_selected_row_IDs[1],c(1,2)]), y = as.matrix(stream_sub_df[stream_selected_row_IDs[2],c(1,2)])))
+        angle_CPP_1_2<-acos(x = ((dist_to_points[1]^2+dist_12^2-dist_to_points[2]^2)/(2*dist_to_points[1]*dist_12)))*(180/pi)
+        coincide_condition<-prod((as.numeric(stream_sub_df[stream_selected_row_IDs[1],c(1,2)])==as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])))
+        if(!is.nan(angle_CPP_1_2)){
+          if((angle_CPP_1_2>=90)|(coincide_condition)){
+            end_stream_node_mapper()
+          }else{
+            mid_stream_node_creator()
+          }
+        }else{
+          if(coincide_condition){
+            end_stream_node_mapper()
+          }else{
+            mid_stream_node_creator()
+          }
+        }
+      }else if(order(dist_to_points)[1]==length(dist_to_points)){
+        dist_end_12<-as.numeric(geosphere::distm(x = as.matrix(stream_sub_df[stream_selected_row_IDs[length(stream_selected_row_IDs)-1],c(1,2)]), y = as.matrix(stream_sub_df[stream_selected_row_IDs[length(stream_selected_row_IDs)],c(1,2)])))
+        angle_CPP_end_1_2<-acos(x = ((dist_to_points[length(dist_to_points)]^2+dist_end_12^2-dist_to_points[length(dist_to_points)-1]^2)/(2*dist_to_points[length(dist_to_points)]*dist_end_12)))*(180/pi)
+        coincide_condition<-prod((as.numeric(stream_sub_df[stream_selected_row_IDs[length(stream_selected_row_IDs)],c(1,2)])==as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])))
+        if(!is.nan(angle_CPP_end_1_2)){
+          if((angle_CPP_end_1_2>=90)|(coincide_condition)){
+            end_stream_node_mapper()
+          }else{
+            mid_stream_node_creator()
+          }
+        }else{
+          if(coincide_condition){
+            end_stream_node_mapper()
+          }else{
+            mid_stream_node_creator()
+          }
+        }
+      }
+    }else{
+      mid_stream_node_creator()
+    }
+    ##%>%addCircleMarkers(lng = dist_to_stream[,2],lat = dist_to_stream[,3], radius = 4,color = "yellow")
+    if(df_anpoll_preprocessed$lat_mapped[i]>90) { df_anpoll_preprocessed$lat_mapped[i] = 90}
+    dist_mapped_to_append[i]<-geosphere::distm(x = df_anpoll_preprocessed[i,c("lon","lat")],y = df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")])
+    #print(i)
+  }
+  ## stopCluster(cl)
+  ## Saving the mapped distances vector
+  load(file=paste0(output_path, "anpoll_files/dist_mapped.RData"))
+  dist_mapped <- cbind(dist_mapped, dist_mapped_to_append)
+  save(dist_mapped,file=paste0(output_path,"anpoll_files/dist_mapped.RData"))
+  ## Load df_anpoll_processed
+  load(paste0(output_path,"anpoll_files/df_anpoll_processed.RData"))
+  row.names(df_anpoll_preprocessed)<-NULL
+  
+  df_anpoll_preprocessed$anpoll_indicator <- "polluter"
+  df_anpoll_preprocessed$conc <- NA
+  ## Append df_anpoll_processed with df_anpoll_preprocessed
+  df_anpoll_processed<-rbind(df_anpoll_processed,df_anpoll_preprocessed)
+  
+  ## Saving the dataframe "df_anpoll_processed"
+  save(df_anpoll_processed,file=paste0(output_path,"anpoll_files/df_anpoll_processed.RData"))
+  ## Subsetting the df_polluter_processed from df_anpoll_processed
+  df_polluter_processed<-df_anpoll_processed[which(df_anpoll_processed$anpoll_indicator=="polluter"),]
+  row.names(df_polluter_processed)<-NULL
+  nrow(df_polluter_processed)
+  save(df_polluter_processed,file=paste0(file_path,"polluter_files/df_polluter_processed.RData"))
+  ###################################################
+  ## Saving the modified 1st MOST IMPORTANT dataframe df_node_latlong, modified total_character_edgelist and modified stream_list
+  
+  save(df_node_latlong_modified,file=paste0(output_path,"common_files_modified/df_node_latlong_modified.RData"))
+  total_edgelist_character_modified<-as.matrix(total_edgelist_character_modified)
+  save(total_edgelist_character_modified,file=paste0(output_path,"common_files_modified/total_edgelist_character_modified.RData"))
+  save(stream_list_modified,file=paste0(output_path,"common_files_modified/stream_list_modified.RData"))
+  return(list(df_anpoll_processed,df_node_latlong_modified,total_edgelist_character_modified,stream_list_modified))
+}
+
 ########################################################################################################
 ## Writing a function to calculate the path distances of all streams in the modified common files. Input is directory path where output file should be stored at and output is path distance vector
 stream_path_dist_cal<-function(output_path){
@@ -519,15 +687,15 @@ vertex_IDs_generator<-function(df_anpoll_nodeID_aggregated,output_path,analyte=T
       ## setting vertex attributes as observation being true/false
       igraph_river_whole<-igraph::set_vertex_attr(graph = igraph_river_whole,name = "analyte",index = igraph::V(igraph_river_whole),value = igraph::V(igraph_river_whole)$name%in%df_anpoll_nodeID_aggregated$nodeID)
       ## extracting vertex ids corresponding to observation locations
-      analyte_vertex_ids<-which(vertex_attr(graph = igraph_river_whole)$`analyte`==TRUE)
+      analyte_vertex_ids<-which(igraph::vertex_attr(graph = igraph_river_whole)$`analyte`==TRUE)
       ## saving the vertex ids in rank subgraph corresponding to analyte observations unique sites
       save(analyte_vertex_ids,file = paste0(output_path,"analyte_files/analyte_vertex_ids.RData"))
       anpoll_vertex_ids<-analyte_vertex_ids
     }else if(polluter){
       ## setting vertex attributes as observation being true/false
-      igraph_river_whole<-set_vertex_attr(graph = igraph_river_whole,name = "polluter",index = igraph::V(igraph_river_whole),value = igraph::V(igraph_river_whole)$name%in%df_anpoll_nodeID_aggregated$nodeID)
+      igraph_river_whole<-igraph::set_vertex_attr(graph = igraph_river_whole,name = "polluter",index = igraph::V(igraph_river_whole),value = igraph::V(igraph_river_whole)$name%in%df_anpoll_nodeID_aggregated$nodeID)
       ## extracting vertex ids corresponding to observation locations
-      polluter_vertex_ids<-which(vertex_attr(graph = igraph_river_whole)$`polluter`==TRUE)
+      polluter_vertex_ids<-which(igraph::vertex_attr(graph = igraph_river_whole)$`polluter`==TRUE)
       ## saving the vertex ids in rank subgraph corresponding to polluter observations unique sites
       save(polluter_vertex_ids,file = paste0(output_path,"polluter_files/polluter_vertex_ids.RData"))
       anpoll_vertex_ids<-polluter_vertex_ids
@@ -721,7 +889,7 @@ flow_dist_polluter_projected_cal<-function(file_path){
   load(file = paste0(file_path,"common_files_modified/stream_path_dist_vec.RData"))
   ## Loading the projected node IDs list
   load(file=paste0(file_path,"polluter_files/projected_nodeIDs_list.RData"))
-  
+  sourceCpp( paste0(file_path, "code/flow_dist_cal_cpp.cpp") , env=environment())
   ## Defining a function to calculate between a test node and a current node. The current nodes are usually polluter nodes.
   flow_dist_cal<-function(short_path_vec, test_node_ID, current_node_ID, file_path){
     ## Initializing and loop to fill up the matrix of edges that are formed by the nodeIDs in the path of test and current node ID
@@ -731,10 +899,15 @@ flow_dist_polluter_projected_cal<-function(file_path){
     }
     ## Initializing the flow distance in meters
     flow_dist_m<-0
-    ## Loop to add up the flow distance of all edges in the flow_path_nodeIDs
-    for(k in 1:nrow(flow_path_nodeIDs_mat)){
-      flow_dist_m<-flow_dist_m+stream_path_dist_vec[which((total_edgelist_character_modified[,1]==flow_path_nodeIDs_mat[k,1])&(total_edgelist_character_modified[,2]==flow_path_nodeIDs_mat[k,2]))]
-    }
+    # ## Loop to add up the flow distance of all edges in the flow_path_nodeIDs
+    # for(k in 1:nrow(flow_path_nodeIDs_mat)){
+    #   flow_dist_m<-flow_dist_m+as.numeric(stream_path_dist_vec[which((total_edgelist_character_modified[,1]==flow_path_nodeIDs_mat[k,1])&(total_edgelist_character_modified[,2]==flow_path_nodeIDs_mat[k,2]))])
+    # }
+    
+    flow_dist_m  <- getDistance(flow_path_nodeIDs = flow_path_nodeIDs_mat,
+                                total_edgelist = total_edgelist_character_modified,
+                                stream_path_dist = stream_path_dist_vec)
+    
     ## flow distance in km
     flow_dist_km<-flow_dist_m/1000
     return(flow_dist_km)
@@ -960,49 +1133,49 @@ anpoll_network_creator <- function(output_path){
 #######################################################################################################
 ########################################################################################################
 ## Defining a wrapper function to calculate flow distance of all polluter nodes in parallel
-wrapper_flow_dist_cal <- function(index,df_polluter,anpoll_edgelist, shortest_path_anpoll_edgelist, total_edgelist_character_modified, from_indicator, to_indicator, file_path){
-  ## Defining a function to calculate between a test node and a current node. The current nodes are usually polluter nodes.
-  flow_dist_cal<-function(anpoll_edgelist, shortest_path_anpoll_edgelist, total_edgelist_character_modified, test_node_ID, current_node_ID, from_indicator, to_indicator, file_path){
-    ## Getting the edge row ID
-    if(from_indicator){
-      edge_row_ID<-which((anpoll_edgelist[,1]==test_node_ID)&(anpoll_edgelist[,2]==current_node_ID))
-    }else if(to_indicator){
-      edge_row_ID<-which((anpoll_edgelist[,1]==current_node_ID)&(anpoll_edgelist[,2]==test_node_ID))
-    }
-    ## Initializing and loop to fill up the matrix of edges that are formed by the nodeIDs in the path of test and current node ID
-    flow_path_nodeIDs<-matrix(NA_character_,nrow = (length(shortest_path_anpoll_edgelist[[edge_row_ID]])-1),ncol = 2)
-    for (i in 1:(length(shortest_path_anpoll_edgelist[[edge_row_ID]])-1)){
-      flow_path_nodeIDs[i,]<-c(shortest_path_anpoll_edgelist[[edge_row_ID]][i],shortest_path_anpoll_edgelist[[edge_row_ID]][i+1])
-    }
-    ## Loading the total_edgelist_character_modified
-    load(file = paste0(file_path,"common_files_modified/stream_path_dist_vec.RData"))
-    ## Initializing the flow distance in meters
-    flow_dist_m<-0
-    ## Loop to add up the flow distance of all edges in the flow_path_nodeIDs
-    for(i in 1:nrow(flow_path_nodeIDs)){
-      flow_dist_m<-flow_dist_m+stream_path_dist_vec[which((total_edgelist_character_modified[,1]==flow_path_nodeIDs[i,1])&(total_edgelist_character_modified[,2]==flow_path_nodeIDs[i,2]))]
-    }
-    ## flow distance in km
-    flow_dist_km<-flow_dist_m/1000
-    return(flow_dist_km)
-  }
-  ## Extracting all connected nodeIDs
-  if(from_indicator){
-    connected_nodeIDs<-anpoll_edgelist[which(anpoll_edgelist[,2]==df_polluter$nodeID[index]),1]
-  }else if(to_indicator){
-    connected_nodeIDs<-anpoll_edgelist[which(anpoll_edgelist[,1]==df_polluter$nodeID[index]),2]
-  }
-  ## Initializing the flow_dist_vec as NA. If there are no connected nodes, this would remain NA
-  flow_dist_vec<-NA
-  if(length(connected_nodeIDs)>0){
-    flow_dist_vec<-rep(NA_integer_,length(connected_nodeIDs))
-    for(j in 1:length(connected_nodeIDs)){
-      flow_dist_vec[j]<-flow_dist_cal(anpoll_edgelist = anpoll_edgelist,shortest_path_anpoll_edgelist = shortest_path_anpoll_edgelist,total_edgelist_character_modified = total_edgelist_character_modified,test_node_ID = connected_nodeIDs[j],current_node_ID = df_polluter$nodeID[index],from_indicator = from_indicator,to_indicator = to_indicator,file_path = file_path)
-      #print(j)
-    }
-  }
-  return(flow_dist_vec)
-}
+# wrapper_flow_dist_cal <- function(index,df_polluter,anpoll_edgelist, shortest_path_anpoll_edgelist, total_edgelist_character_modified, from_indicator, to_indicator, file_path){
+#   ## Defining a function to calculate between a test node and a current node. The current nodes are usually polluter nodes.
+#   flow_dist_cal<-function(anpoll_edgelist, shortest_path_anpoll_edgelist, total_edgelist_character_modified, test_node_ID, current_node_ID, from_indicator, to_indicator, file_path){
+#     ## Getting the edge row ID
+#     if(from_indicator){
+#       edge_row_ID<-which((anpoll_edgelist[,1]==test_node_ID)&(anpoll_edgelist[,2]==current_node_ID))
+#     }else if(to_indicator){
+#       edge_row_ID<-which((anpoll_edgelist[,1]==current_node_ID)&(anpoll_edgelist[,2]==test_node_ID))
+#     }
+#     ## Initializing and loop to fill up the matrix of edges that are formed by the nodeIDs in the path of test and current node ID
+#     flow_path_nodeIDs<-matrix(NA_character_,nrow = (length(shortest_path_anpoll_edgelist[[edge_row_ID]])-1),ncol = 2)
+#     for (i in 1:(length(shortest_path_anpoll_edgelist[[edge_row_ID]])-1)){
+#       flow_path_nodeIDs[i,]<-c(shortest_path_anpoll_edgelist[[edge_row_ID]][i],shortest_path_anpoll_edgelist[[edge_row_ID]][i+1])
+#     }
+#     ## Loading the total_edgelist_character_modified
+#     load(file = paste0(file_path,"common_files_modified/stream_path_dist_vec.RData"))
+#     ## Initializing the flow distance in meters
+#     flow_dist_m<-0
+#     ## Loop to add up the flow distance of all edges in the flow_path_nodeIDs
+#     for(i in 1:nrow(flow_path_nodeIDs)){
+#       flow_dist_m<-flow_dist_m+stream_path_dist_vec[which((total_edgelist_character_modified[,1]==flow_path_nodeIDs[i,1])&(total_edgelist_character_modified[,2]==flow_path_nodeIDs[i,2]))]
+#     }
+#     ## flow distance in km
+#     flow_dist_km<-flow_dist_m/1000
+#     return(flow_dist_km)
+#   }
+#   ## Extracting all connected nodeIDs
+#   if(from_indicator){
+#     connected_nodeIDs<-anpoll_edgelist[which(anpoll_edgelist[,2]==df_polluter$nodeID[index]),1]
+#   }else if(to_indicator){
+#     connected_nodeIDs<-anpoll_edgelist[which(anpoll_edgelist[,1]==df_polluter$nodeID[index]),2]
+#   }
+#   ## Initializing the flow_dist_vec as NA. If there are no connected nodes, this would remain NA
+#   flow_dist_vec<-NA
+#   if(length(connected_nodeIDs)>0){
+#     flow_dist_vec<-rep(NA_integer_,length(connected_nodeIDs))
+#     for(j in 1:length(connected_nodeIDs)){
+#       flow_dist_vec[j]<-flow_dist_cal(anpoll_edgelist = anpoll_edgelist,shortest_path_anpoll_edgelist = shortest_path_anpoll_edgelist,total_edgelist_character_modified = total_edgelist_character_modified,test_node_ID = connected_nodeIDs[j],current_node_ID = df_polluter$nodeID[index],from_indicator = from_indicator,to_indicator = to_indicator,file_path = file_path)
+#       #print(j)
+#     }
+#   }
+#   return(flow_dist_vec)
+# }
 
 ## Defining a wrapper function to calculate flow distance of all polluter nodes in parallel by dividing in chunks. The chunk code was written by Alex so may need another look...
 wrapper_flow_dist_cal_chunk_parallelized <- function(df_polluter,anpoll_edgelist, shortest_path_anpoll_edgelist, total_edgelist_character_modified, from_indicator, to_indicator,chunk_list,n_chunk, file_path){
@@ -1110,7 +1283,8 @@ polluter_test_dist_time <- function(df_polluter, polluter_lon, polluter_lat, pol
   ## Loading the "flow_dist_to_list"
   load(file = paste0(file_path,"inference/flow_dist_to_list.RData"))
   load(file = paste0(file_path,"inference/flow_dist_from_list_projected.RData"))
-  flow_dist_polluter_projected_list <- flow_dist_polluter_projected_cal(file_path)
+  load(file = paste0(file_path,"polluter_files/flow_dist_polluter_projected_list.RData"))
+  #flow_dist_polluter_projected_list <- flow_dist_polluter_projected_cal(file_path)
   ####################################################
   ## Collecting all to nodes that are directed from the polluter_nodeID
   to_edgelist_ids_total<-which(anpoll_edgelist[,1]==polluter_node_ID)
