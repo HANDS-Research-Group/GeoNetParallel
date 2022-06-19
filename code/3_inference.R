@@ -21,6 +21,7 @@ df_threshold_dist_km <- data.frame("polluter_intersection" = numeric(),"upstream
 
 df_threshold_dist_km[1,] <- c(5, 5, 0, 10)
 df_threshold_dist_km[2,] <- c(45, 5, 0, 50)
+n_chunks <- 20
 
 for(j in 2:2) {
   ########################################################################################################
@@ -28,7 +29,9 @@ for(j in 2:2) {
   load(file = paste0(file_path,"polluter_files/df_polluter_processed.RData"))
   print(length(df_polluter_processed))
   dir.create(path = paste0(file_path,"inference/test_results"))
-  n_chunks <- 2
+  if(n_chunks>nrow(df_polluter_processed)){
+        n_chunks<-nrow(df_polluter_processed)
+    }
   #chunk_size<-ceiling(12/n_chunks)
   chunk_size <- ceiling(nrow(df_polluter_processed)/n_chunks)
   #indices_all<-1:12
@@ -41,7 +44,7 @@ for(j in 2:2) {
   ## wrapper_polluter_test(n_chunks=n_chunks,file_path = file_path)
   cl <- parallel::makeCluster(spec = n_chunks)
   doParallel::registerDoParallel(cl)
-  test_result_list <- foreach (index = 1:n_chunks)%dopar% {
+  test_result_list <- foreach::foreach (index = 1:n_chunks)%dopar% {
     wrapper_polluter_test(index=index, n_chunks=n_chunks,file_path = file_path, j=j, df_threshold_dist_km = df_threshold_dist_km)
   }
   parallel::stopCluster(cl)

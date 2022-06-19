@@ -70,7 +70,8 @@ shapefile_pre_processing<-function(shape_obj,output_path){
 
 ########################################################################################################
 ## Writing a function for a two step mapping procedure of all C-PP locations by mapping them to nearest nodes in the base network or dividing the streams and creating new nodes. The 1st main goal is to add these mapped node IDs to the dataframe "df_anpoll_preprocessed" and return that as first argument. The 2nd main goal of this function is to modify all the preprocessed river network files ("df_node_latlong", "total_edgelist_character" and "stream_list") based on this finalized mapping. Inputs are 1) preprocessed dataframe for anpoll "df_anpoll_preprocessed" and 2) directory path where output file should be stored at and outputs 1) df_anpoll_preprocessed with additional column node ID and 2) all outputs same as shapefile_pre_processing but all of them modified
-two_step_anpoll_mapper<-function(df_anpoll_preprocessed,output_path, file_path){
+two_step_anpoll_mapper<-function(df_anpoll_preprocessed,output_path){
+  file_path <- output_path
   ## Loading the dataframe "df_node_latlong" from common files
   load(file = paste0(output_path,"common_files/df_node_latlong.RData"))
   ## Loading the "total_edgelist_character" from common files
@@ -230,7 +231,8 @@ two_step_anpoll_mapper<-function(df_anpoll_preprocessed,output_path, file_path){
   return(list(df_anpoll_processed,df_node_latlong_modified,total_edgelist_character_modified,stream_list_modified))
 }
 
-two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path, file_path){
+two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path){
+  file_path <- output_path
   ## Loading the dataframe "df_node_latlong" from common files
   load(file = paste0(output_path,"common_files/df_node_latlong.RData"))
   ## Loading the "total_edgelist_character" from common files
@@ -396,7 +398,8 @@ two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path, fil
   save(stream_list_modified,file=paste0(output_path,"common_files_modified/stream_list_modified.RData"))
   return(list(df_anpoll_processed,df_node_latlong_modified,total_edgelist_character_modified,stream_list_modified))
 }
-two_step_anpoll_mapper_update_polluter<-function(df_anpoll_preprocessed, output_path, file_path){
+two_step_anpoll_mapper_update_polluter<-function(df_anpoll_preprocessed, output_path){
+  file_path <- output_path
   ## Loading the dataframe "df_node_latlong" from common files
   load(file = paste0(output_path,"common_files/df_node_latlong.RData"))
   ## Loading the "total_edgelist_character" from common files

@@ -14,7 +14,7 @@ inference <- function() {
 # the polluter sites already present in GeoNet and a dataframe with
 # new temporal polluter information and the threshold distance in km
 # to produce new inference result
-add_temporal_polluter <- function(df_polluter_to_append_file_path) {
+add_temporal_polluter  <- function(df_polluter_to_append_file_path) {
     df_threshold_dist_km <- data.frame("polluter_intersection" = numeric(),"upstream" = numeric(), "downstream_lower" = numeric(),"downstream_upper" = numeric())
 
     df_threshold_dist_km[1,] <- c(5, 5, 0, 10)
@@ -158,7 +158,7 @@ add_new_analyte <- function(df_analyte_to_append_filepath) {
     df_analyte_to_append$date <- as.Date(df_analyte_to_append$date, format = "%m/%d/%y")
 
     two_step_anpoll_mapper_list <- two_step_anpoll_mapper_update(df_anpoll_preprocessed = df_analyte_to_append, 
-                                                                output_path = file_path, file_path = file_path)
+                                                                output_path = file_path)
 
     load(file = paste0(file_path, "anpoll_files/df_anpoll_processed.RData"))
     load(file = paste0(file_path,"analyte_files/df_analyte_nodeID_aggregated.RData"))
@@ -168,7 +168,7 @@ add_new_analyte <- function(df_analyte_to_append_filepath) {
     analyte_vertex_ids <- vertex_IDs_generator(df_anpoll_nodeID_aggregated = df_analyte_nodeID_aggregated,output_path = file_path,analyte=T,polluter=F,graph_subset=graph_subset_indicator)
 
     ########################################################################################################
-    ## Creating shortest path edgelist by defining the segments and epochs and running in parallel 6 segments in each epoch with foreach
+    ## Creating shortest path edgelist by defining the segments and epochs and running in parallel 6 segments in each epoch with foreach::foreach
 
     ## Loading the analyte and polluter vertex ids
     load(file = paste0(file_path,"analyte_files/analyte_vertex_ids.RData"))
@@ -193,7 +193,7 @@ add_new_analyte <- function(df_analyte_to_append_filepath) {
 
     cl <- parallel::makeCluster(spec = n_chunks)
     doParallel::registerDoParallel(cl)
-    shortest_path_anpoll_edgelist_chunk <- foreach (index = 1:n_chunks)%do% {
+    shortest_path_anpoll_edgelist_chunk <- foreach::foreach (index = 1:n_chunks)%do% {
       file_path <- "C:/Users/rohit/OneDrive - Syracuse University/GeoNet/Repo/GeoNet2022/"
       source(file = paste0(file_path, "code/BaSu_network_v16_modular_functions.R"), local=T)
       
@@ -250,7 +250,7 @@ add_new_analyte <- function(df_analyte_to_append_filepath) {
     ## cl <- parallel::makeCluster(2)
     ## doParallel::registerDoParallel(cl)
     sourceCpp( paste0(file_path, "code/flow_dist_cal_cpp.cpp") )
-    flow_dist_to_list<-foreach (index = 1:nrow(df_polluter_nodeID_aggregated), .packages="Rcpp", .noexport = "getDistance")%do% {
+    flow_dist_to_list<-foreach::foreach (index = 1:nrow(df_polluter_nodeID_aggregated), .packages="Rcpp", .noexport = "getDistance")%do% {
       source(file = paste0(file_path, "code/BaSu_network_v16_modular_functions.R"), local=T)
       wrapper_flow_dist_cal(index, df_polluter= df_polluter_nodeID_aggregated,
                             anpoll_edgelist = anpoll_edgelist,
@@ -278,7 +278,7 @@ add_new_polluter <- function(df_polluter_to_append_file_path) {
         
     load(file=paste0(file_path,"polluter_files/df_polluter_processed.RData"))
     two_step_anpoll_mapper_list <- two_step_anpoll_mapper_update_polluter(df_anpoll_preprocessed = df_polluter_preprocessed, 
-                                                                output_path = file_path, file_path = file_path)
+                                                                output_path = file_path)
 
     load(file = paste0(file_path, "anpoll_files/df_anpoll_processed.RData"))
     load(file = paste0(file_path,"analyte_files/df_analyte_nodeID_aggregated.RData"))
@@ -291,7 +291,7 @@ add_new_polluter <- function(df_polluter_to_append_file_path) {
     analyte_vertex_ids <- vertex_IDs_generator(df_anpoll_nodeID_aggregated = df_analyte_nodeID_aggregated,output_path = file_path,analyte=T,polluter=F,graph_subset=graph_subset_indicator)
 
     ########################################################################################################
-    ## Creating shortest path edgelist by defining the segments and epochs and running in parallel 6 segments in each epoch with foreach
+    ## Creating shortest path edgelist by defining the segments and epochs and running in parallel 6 segments in each epoch with foreach::foreach
 
     ## Loading the analyte and polluter vertex ids
     load(file = paste0(file_path,"analyte_files/analyte_vertex_ids.RData"))
@@ -301,7 +301,7 @@ add_new_polluter <- function(df_polluter_to_append_file_path) {
     ## Loading the igraph object for whole river network
     load(file = paste0(file_path,"common_files_modified/igraph_river_whole.RData"))
     ## Getting the vertex IDs for the projected node IDs
-    projected_vertex_ids <- which(V(igraph_river_whole)$name%in%projected_nodeIDs_vec)
+    projected_vertex_ids <- which(igraph::V(igraph_river_whole)$name%in%projected_nodeIDs_vec)
 
     ## Combining the analyte, polluter and projected vertex ids
     analyte_polluter_projected_vertex_ids <- sort(unique(c(analyte_vertex_ids,polluter_vertex_ids,projected_vertex_ids)))
@@ -316,7 +316,7 @@ add_new_polluter <- function(df_polluter_to_append_file_path) {
 
     cl <- parallel::makeCluster(spec = n_chunks)
     doParallel::registerDoParallel(cl)
-    shortest_path_anpoll_edgelist_chunk <- foreach (index = 1:n_chunks)%do% {
+    shortest_path_anpoll_edgelist_chunk <- foreach::foreach (index = 1:n_chunks)%do% {
       file_path <- "C:/Users/rohit/OneDrive - Syracuse University/GeoNet/Repo/GeoNet2022/"
       source(file = paste0(file_path, "code/BaSu_network_v16_modular_functions.R"), local=T)
       
@@ -372,9 +372,9 @@ add_new_polluter <- function(df_polluter_to_append_file_path) {
     ## Uncomment the following section
     ## cl <- parallel::makeCluster(2)
     ## doParallel::registerDoParallel(cl)
-    ##flow_dist_from_list_polluters <- foreach (index = 1:nrow(df_polluter_nodeID_aggregated)) %dopar%{
+    ##flow_dist_from_list_polluters <- foreach::foreach (index = 1:nrow(df_polluter_nodeID_aggregated)) %dopar%{
     sourceCpp( paste0(file_path, "code/flow_dist_cal_cpp.cpp") , env=environment())
-    flow_dist_from_list_polluters <- foreach (index = 1:nrow(df_polluter_nodeID_aggregated), .packages="Rcpp", .noexport = "getDistance") %do% {
+    flow_dist_from_list_polluters <- foreach::foreach (index = 1:nrow(df_polluter_nodeID_aggregated), .packages="Rcpp", .noexport = "getDistance") %do% {
       source(file = paste0(file_path, "code/BaSu_network_v16_modular_functions.R"), local=T)   
       sourceCpp( paste0(file_path, "code/flow_dist_cal_cpp.cpp"), env=environment() )
       wrapper_flow_dist_cal(index, df_polluter = df_polluter_nodeID_aggregated,
@@ -402,7 +402,7 @@ add_new_polluter <- function(df_polluter_to_append_file_path) {
     ## cl <- parallel::makeCluster(2)
     ## doParallel::registerDoParallel(cl)
     sourceCpp( paste0(file_path, "code/flow_dist_cal_cpp.cpp") , env=environment())
-    flow_dist_from_list_projected<-foreach (index =1:nrow(df_projected_nodeIDs), .packages="Rcpp", .noexport = "getDistance")%do% {
+    flow_dist_from_list_projected<-foreach::foreach (index =1:nrow(df_projected_nodeIDs), .packages="Rcpp", .noexport = "getDistance")%do% {
       source(file = paste0(file_path, "code/BaSu_network_v16_modular_functions.R"), local=T)
       wrapper_flow_dist_cal(index, df_polluter=df_projected_nodeIDs,
                             anpoll_edgelist = anpoll_edgelist,
