@@ -431,14 +431,18 @@ add_new_polluter <- function(df_polluter_to_append_file_path) {
     inference()
 }
 ## The following function to add both analyte and polluter together at a time.
-add_temporal_analyte_polluter <- function(df_analyte_to_append_filepath, df_polluter_to_append_file_path) {
-    add_temporal_polluter(df_polluter_to_append)
-    add_temporal_analyte(df_analyte_to_append)
+add_temporal_analyte_polluter <- function(df_analyte_to_append_filepath, df_polluter_to_append_filepath) {
+    add_temporal_polluter(df_polluter_to_append_filepath)
+    add_temporal_analyte(df_analyte_to_append_filepath)
 }
 
+add_new_analyte_polluter <- function(df_analyte_to_append_filepath, df_polluter_to_append_filepath) {
+    add_new_polluter(df_polluter_to_append_filepath)
+    add_new_analyte(df_analyte_to_append_filepath)
+}
 
-df_polluter_to_append_file_path<- paste0(file_path,"data/Pollution_Site_R_Package_new.csv")
+df_polluter_to_append_filepath<- paste0(file_path,"data/Pollution_Site_R_Package_new.csv")
 df_analyte_to_append_filepath <- paste0(file_path,"data/Water_chemistry_new.csv")
 
 # add_new_analyte(df_analyte_to_append_filepath)
-add_new_polluter(df_polluter_to_append_file_path)
+add_new_polluter(df_polluter_to_append_filepath)
