@@ -23,7 +23,7 @@ df_threshold_dist_km[1,] <- c(5, 5, 0, 10)
 df_threshold_dist_km[2,] <- c(45, 5, 0, 50)
 n_chunks <- 20
 
-for(j in 2:2) {
+for(j in 1:2) {
   ########################################################################################################
   
   load(file = paste0(file_path,"polluter_files/df_polluter_processed.RData"))

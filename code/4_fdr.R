@@ -14,7 +14,7 @@ load(file = paste0(file_path,"polluter_files/df_polluter_processed.RData"))
 df_polluter_processed_appended  <- df_polluter_processed
 df_polluter_processed_appended$County  <-  NA
 ## df_polluter_processed_appended[nrow(df_polluter_processed_appended)+1,]  <- df_polluter_processed_appended[nrow(df_polluter_processed_appended),]
-for(j in 2:2) {
+for(j in 1:2) {
 ## for (j in 2:nrow(df_threshold_dist_km)){
     
   #####################################################
