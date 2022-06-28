@@ -17,8 +17,13 @@ inference <- function() {
 add_temporal_polluter  <- function(df_polluter_to_append_file_path) {
     df_threshold_dist_km <- data.frame("polluter_intersection" = numeric(),"upstream" = numeric(), "downstream_lower" = numeric(),"downstream_upper" = numeric())
 
-    df_threshold_dist_km[1,] <- c(5, 5, 0, 10)
-    df_threshold_dist_km[2,] <- c(45, 5, 0, 50)
+    upstream_thresh <- 5
+    downstream_lower_thresh <- 0
+    downstream_upper_thresh <- 50
+
+    df_threshold_dist_km <- data.frame("polluter_intersection" = numeric(),"upstream" = numeric(), "downstream_lower" = numeric(),"downstream_upper" = numeric())
+
+    df_threshold_dist_km[1,] <- c(downstream_upper_thresh-5, upstream_thresh, downstream_lower_thresh, downstream_upper_thresh)
 
     df_polluter_raw<-utils::read.csv(file = df_polluter_to_append_file_path)
     str(df_polluter_raw)
@@ -102,7 +107,7 @@ add_temporal_polluter  <- function(df_polluter_to_append_file_path) {
     df_polluter_processed_appended <- rbind(df_polluter_processed, df_polluter_processed_appended)
     df_polluter_processed_appended$County  <-  NA
     ## df_polluter_processed_appended[nrow(df_polluter_processed_appended)+1,]  <- df_polluter_processed_appended[nrow(df_polluter_processed_appended),]
-    for(j in 1:2) {
+    for(j in 1:nrow(df_threshold_dist_km)) {
       ## for (j in 2:nrow(df_threshold_dist_km)){
       
       #####################################################

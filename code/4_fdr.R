@@ -4,17 +4,19 @@ file_path <- "C:/Users/rohit/OneDrive - Syracuse University/GeoNet/Repo/GeoNet20
 
 ## Sourcing the modular functions for analysis
 source(file = paste0(file_path, "code/BaSu_network_v16_modular_functions.R"))
+upstream_thresh <- 5
+downstream_lower_thresh <- 0
+downstream_upper_thresh <- 50
 
-df_threshold_dist_km <- data.frame("polluter_intersection" = numeric(), "upstream" = numeric(), "downstream_lower"=numeric(), "downstream_upper" = numeric())
+df_threshold_dist_km <- data.frame("polluter_intersection" = numeric(),"upstream" = numeric(), "downstream_lower" = numeric(),"downstream_upper" = numeric())
 
-df_threshold_dist_km[1,] <- c(5, 5, 0, 10)
-df_threshold_dist_km[2,] <- c(45, 10, 0, 50)
+df_threshold_dist_km[1,] <- c(downstream_upper_thresh-5, upstream_thresh, downstream_lower_thresh, downstream_upper_thresh)
 
 load(file = paste0(file_path,"polluter_files/df_polluter_processed.RData"))
 df_polluter_processed_appended  <- df_polluter_processed
 df_polluter_processed_appended$County  <-  NA
 ## df_polluter_processed_appended[nrow(df_polluter_processed_appended)+1,]  <- df_polluter_processed_appended[nrow(df_polluter_processed_appended),]
-for(j in 1:2) {
+for(j in 1:nrow(df_threshold_dist_km)) {
 ## for (j in 2:nrow(df_threshold_dist_km)){
     
   #####################################################
