@@ -37,7 +37,8 @@ add_temporal_polluter  <- function(df_polluter_to_append_file_path) {
     df_polluter_preprocessed$lon_mapped <- NA
     df_polluter_preprocessed$lat_mapped <- NA
     df_polluter_preprocessed$nodeID <- NA
-
+    df_polluter_preprocessed$conc <- NA
+    df_polluter_preprocessed$anpoll_indicator <- "polluter"
     df_polluter_preprocessed$lon_mapped <- df_polluter_processed$lon_mapped[which(df_polluter_preprocessed$lon==df_polluter_processed$lon &
                                                                                     df_polluter_preprocessed$lat==df_polluter_processed$lat)]
     df_polluter_preprocessed$lat_mapped <- df_polluter_processed$lat_mapped[which(df_polluter_preprocessed$lat==df_polluter_processed$lat &
@@ -446,8 +447,9 @@ add_new_analyte_polluter <- function(df_analyte_to_append_filepath, df_polluter_
     add_new_analyte(df_analyte_to_append_filepath)
 }
 
-df_polluter_to_append_filepath<- paste0(file_path,"data/Pollution_Site_R_Package_new.csv")
+df_polluter_to_append_filepath<- paste0(file_path,"data/Pollution_Site_R_Package_temporal.csv")
 df_analyte_to_append_filepath <- paste0(file_path,"data/Water_chemistry_new.csv")
 
 # add_new_analyte(df_analyte_to_append_filepath)
-add_new_polluter(df_polluter_to_append_filepath)
+# add_new_polluter(df_polluter_to_append_filepath)
+add_temporal_polluter(df_polluter_to_append_filepath)
