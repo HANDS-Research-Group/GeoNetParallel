@@ -106,6 +106,9 @@ add_temporal_polluter  <- function(df_polluter_to_append_file_path) {
     ####################
     
     df_polluter_processed_appended <- rbind(df_polluter_processed, df_polluter_processed_appended)
+    df_polluter_processed <- df_polluter_processed_appended
+    save(df_polluter_processed, file = paste0(file_path, "polluter_files/df_polluter_processed.RData"))
+    
     df_polluter_processed_appended$County  <-  NA
     ## df_polluter_processed_appended[nrow(df_polluter_processed_appended)+1,]  <- df_polluter_processed_appended[nrow(df_polluter_processed_appended),]
     for(j in 1:nrow(df_threshold_dist_km)) {
