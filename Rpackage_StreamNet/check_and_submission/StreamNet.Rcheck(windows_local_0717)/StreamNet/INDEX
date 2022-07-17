@@ -1,0 +1,13 @@
+add_new_analyte         Add new water chemistry data at new sampling
+                        locations
+add_new_analyte_polluter
+                        Add new water chemistry data and polluting
+                        events at new locations
+add_new_polluter        Add polluting events at new locations
+add_temporal_analyte    Add new water chemistry data at existing
+                        locations
+add_temporal_analyte_polluter
+                        Add new water chemistry data and polluting
+                        events at existing locations
+add_temporal_polluter   Add polluting events at existing locations
+whole_pipe              The Function for the whole pipeline.

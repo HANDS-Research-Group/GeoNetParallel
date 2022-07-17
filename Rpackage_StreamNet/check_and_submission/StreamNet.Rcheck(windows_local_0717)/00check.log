@@ -1,0 +1,243 @@
+* using log directory 'C:/Users/15000/OneDrive/Documents/StreamNet.Rcheck'
+* using R version 4.2.0 (2022-04-22 ucrt)
+* using platform: x86_64-w64-mingw32 (64-bit)
+* using session charset: UTF-8
+* using option '--as-cran'
+* checking for file 'StreamNet/DESCRIPTION' ... OK
+* this is package 'StreamNet' version '0.0.1'
+* package encoding: UTF-8
+* checking CRAN incoming feasibility ... NOTE
+Maintainer: 'Tao Wen <twen08@syr.edu>'
+
+New submission
+* checking package namespace information ... OK
+* checking package dependencies ... NOTE
+Imports includes 25 non-default packages.
+Importing from so many packages makes the package vulnerable to any of
+them becoming unavailable.  Move as many as possible to Suggests and
+use conditionally.
+* checking if this is a source package ... OK
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... OK
+* checking for portable file names ... OK
+* checking serialization versions ... OK
+* checking whether package 'StreamNet' can be installed ... OK
+* checking installed package size ... OK
+* checking package directory ... OK
+* checking for future file timestamps ... OK
+* checking DESCRIPTION meta-information ... OK
+* checking top-level files ... OK
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking R files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking loading without being on the library search path ... OK
+* checking use of S3 registration ... OK
+* checking dependencies in R code ... NOTE
+Namespaces in Imports field not imported from:
+  'GGally' 'MASS' 'data.table' 'forcats' 'ggplot2' 'intergraph'
+  'iterators' 'mapdata' 'maps' 'network' 'purrr' 'readr' 'sna' 'sp'
+  'statnet.common' 'stringr' 'tibble' 'tidyr'
+  All declared Imports should be used.
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... NOTE
+add_new_analyte: no visible binding for global variable
+  'df_anpoll_processed'
+add_new_analyte: no visible binding for global variable
+  'df_analyte_nodeID_aggregated'
+add_new_analyte: no visible binding for global variable
+  'igraph_river_whole'
+add_new_analyte: no visible binding for global variable
+  'projected_nodeIDs_vec'
+add_new_analyte: no visible binding for global variable
+  'polluter_vertex_ids'
+add_new_analyte: no visible binding for global variable 'index'
+add_new_analyte: no visible binding for global variable
+  'df_polluter_nodeID_aggregated'
+add_new_analyte: no visible binding for global variable
+  'anpoll_edgelist'
+add_new_analyte: no visible binding for global variable
+  'total_edgelist_character_modified'
+add_new_analyte: no visible binding for global variable 'test_result'
+add_new_polluter: no visible binding for global variable
+  'df_anpoll_processed'
+add_new_polluter: no visible binding for global variable
+  'df_analyte_nodeID_aggregated'
+add_new_polluter: no visible binding for global variable
+  'igraph_river_whole'
+add_new_polluter: no visible binding for global variable
+  'polluter_vertex_ids'
+add_new_polluter: no visible binding for global variable 'index'
+add_new_polluter: no visible binding for global variable
+  'anpoll_edgelist'
+add_new_polluter: no visible binding for global variable
+  'total_edgelist_character_modified'
+add_new_polluter: no visible binding for global variable 'test_result'
+add_temporal_analyte: no visible binding for global variable
+  'df_polluter_processed'
+add_temporal_analyte: no visible binding for global variable 'index'
+add_temporal_analyte: no visible binding for global variable
+  'test_result'
+anpoll_network_creator: no visible binding for global variable
+  'shortest_path_anpoll_edgelist'
+anpoll_network_creator: no visible binding for global variable
+  'df_analyte_nodeID_aggregated'
+anpoll_network_creator: no visible binding for global variable
+  'df_polluter_nodeID_aggregated'
+fdr_analysis_wrapper: no visible binding for global variable
+  'df_polluter_processed'
+flow_dist_polluter_projected_cal : flow_dist_cal: no visible binding
+  for global variable 'total_edgelist_character_modified'
+flow_dist_polluter_projected_cal : flow_dist_cal: no visible binding
+  for global variable 'stream_path_dist_vec'
+flow_dist_polluter_projected_cal: no visible binding for global
+  variable 'projected_nodeIDs_list'
+flow_dist_polluter_projected_cal: no visible binding for global
+  variable 'igraph_river_whole'
+from_nodeIDs_crawler: no visible binding for global variable
+  'anpoll_edgelist'
+from_nodeIDs_crawler: no visible binding for global variable
+  'flow_dist_from_list'
+polluter_test_dist_time: no visible binding for global variable
+  'anpoll_edgelist'
+polluter_test_dist_time: no visible binding for global variable
+  'flow_dist_to_list'
+polluter_test_dist_time: no visible binding for global variable
+  'projected_nodeIDs_list'
+polluter_test_dist_time: no visible binding for global variable
+  'flow_dist_polluter_projected_list'
+polluter_test_dist_time: no visible binding for global variable
+  'df_node_latlong_anpoll'
+polluter_test_dist_time: no visible binding for global variable
+  'listID_nodeID_matrix'
+polluter_test_dist_time: no visible binding for global variable
+  'list_analyte_time'
+projected_nodeIDs_list_generator: no visible binding for global
+  variable 'df_polluter_processed'
+projected_nodeIDs_list_generator: no visible binding for global
+  variable 'df_node_latlong'
+projected_nodeIDs_list_generator: no visible binding for global
+  variable 'igraph_river_whole'
+projected_nodeIDs_list_generator_new_polluter: no visible binding for
+  global variable 'df_node_latlong'
+projected_nodeIDs_list_generator_new_polluter: no visible binding for
+  global variable 'igraph_river_whole'
+river_net_subset: no visible binding for global variable
+  'total_edgelist_character_modified'
+shortest_path_edgelist_creator: no visible binding for global variable
+  'igraph_river_whole'
+shortest_path_edgelist_creator: no visible binding for global variable
+  'projected_nodeIDs_vec'
+shortest_path_edgelist_creator: no visible binding for global variable
+  'analyte_vertex_ids'
+shortest_path_edgelist_creator: no visible binding for global variable
+  'polluter_vertex_ids'
+shortest_path_edgelist_creator_parallelized: no visible binding for
+  global variable 'igraph_river_whole'
+shortest_path_edgelist_creator_parallelized: no visible binding for
+  global variable 'projected_nodeIDs_vec'
+shortest_path_edgelist_creator_parallelized: no visible binding for
+  global variable 'analyte_vertex_ids'
+shortest_path_edgelist_creator_parallelized: no visible binding for
+  global variable 'polluter_vertex_ids'
+shortest_path_edgelist_creator_parallelized: no visible binding for
+  global variable 'igraph_obj'
+shortest_path_edgelist_creator_parallelized_2: no visible binding for
+  global variable 'igraph_river_whole'
+shortest_path_edgelist_creator_parallelized_2: no visible binding for
+  global variable 'projected_nodeIDs_vec'
+shortest_path_edgelist_creator_parallelized_2: no visible binding for
+  global variable 'analyte_vertex_ids'
+shortest_path_edgelist_creator_parallelized_2: no visible binding for
+  global variable 'polluter_vertex_ids'
+stream_path_dist_cal: no visible binding for global variable
+  'total_edgelist_character_modified'
+stream_path_dist_cal: no visible binding for global variable
+  'stream_list_modified'
+two_step_anpoll_mapper: no visible binding for global variable
+  'total_edgelist_character'
+two_step_anpoll_mapper: no visible binding for global variable
+  'stream_list'
+two_step_anpoll_mapper: no visible binding for global variable
+  'df_node_latlong'
+two_step_anpoll_mapper_update: no visible binding for global variable
+  'total_edgelist_character'
+two_step_anpoll_mapper_update: no visible binding for global variable
+  'stream_list'
+two_step_anpoll_mapper_update_polluter: no visible binding for global
+  variable 'total_edgelist_character'
+two_step_anpoll_mapper_update_polluter: no visible binding for global
+  variable 'stream_list'
+vertex_IDs_generator: no visible binding for global variable
+  'graph_order'
+whole_pipe: no visible binding for global variable
+  'df_anpoll_processed'
+whole_pipe: no visible binding for global variable
+  'df_analyte_nodeID_aggregated'
+whole_pipe: no visible binding for global variable 'igraph_river_whole'
+whole_pipe: no visible binding for global variable 'index'
+whole_pipe: no visible binding for global variable 'anpoll_edgelist'
+whole_pipe: no visible binding for global variable
+  'total_edgelist_character_modified'
+whole_pipe: no visible binding for global variable 'test_result'
+wrapper_flow_dist_cal : flow_dist_cal: no visible binding for global
+  variable 'stream_path_dist_vec'
+wrapper_flow_dist_cal_chunk_parallelized : flow_dist_cal: no visible
+  binding for global variable 'stream_path_dist_vec'
+wrapper_flow_dist_cal_chunk_parallelized: no visible binding for global
+  variable 'df_projected_nodeIDs'
+wrapper_polluter_test: no visible binding for global variable
+  'df_polluter_processed'
+wrapper_polluter_test_update: no visible binding for global variable
+  'df_polluter_processed_to_append'
+wrapper_polluter_test_update: no visible binding for global variable
+  'df_polluter_processed'
+Undefined global functions or variables:
+  analyte_vertex_ids anpoll_edgelist df_analyte_nodeID_aggregated
+  df_anpoll_processed df_node_latlong df_node_latlong_anpoll
+  df_polluter_nodeID_aggregated df_polluter_processed
+  df_polluter_processed_to_append df_projected_nodeIDs
+  flow_dist_from_list flow_dist_polluter_projected_list
+  flow_dist_to_list graph_order igraph_obj igraph_river_whole index
+  listID_nodeID_matrix list_analyte_time polluter_vertex_ids
+  projected_nodeIDs_list projected_nodeIDs_vec
+  shortest_path_anpoll_edgelist stream_list stream_list_modified
+  stream_path_dist_vec test_result total_edgelist_character
+  total_edgelist_character_modified
+
+Found if() conditions comparing class() to string:
+File 'StreamNet/R/utility_functions.R': if (class(try(stats::t.test(x = from_obs_before_spill, y = from_obs_after_spill, alternative = "less")$p.value)) == "try-error") ...
+File 'StreamNet/R/utility_functions.R': if (class(try(stats::wilcox.test(x = from_obs_before_spill, y = from_obs_after_spill, alternative = "less", exact = F)$p.value)) == "try-error") ...
+File 'StreamNet/R/utility_functions.R': if (class(try(stats::t.test(x = to_obs_before_spill, y = to_obs_after_spill, alternative = "less")$p.value)) == "try-error") ...
+File 'StreamNet/R/utility_functions.R': if (class(try(stats::wilcox.test(x = to_obs_before_spill, y = to_obs_after_spill, alternative = "less")$p.value)) == "try-error") ...
+File 'StreamNet/R/utility_functions.R': if (class(try(stats::t.test(x = from_obs_total, y = to_obs_after_spill, alternative = "less")$p.value, silent = T)) == "try-error") ...
+File 'StreamNet/R/utility_functions.R': if (class(try(stats::wilcox.test(x = from_obs_total, y = to_obs_after_spill, alternative = "less")$p.value)) == "try-error") ...
+Use inherits() (or maybe is()) instead.
+* checking Rd files ... OK
+* checking Rd metadata ... OK
+* checking Rd line widths ... OK
+* checking Rd cross-references ... OK
+* checking for missing documentation entries ... OK
+* checking for code/documentation mismatches ... OK
+* checking Rd \usage sections ... OK
+* checking Rd contents ... OK
+* checking for unstated dependencies in examples ... OK
+* checking line endings in C/C++/Fortran sources/headers ... OK
+* checking pragmas in C/C++ headers and code ... OK
+* checking compilation flags used ... OK
+* checking compiled code ... OK
+* checking examples ... OK
+* checking PDF version of manual ... OK
+* checking for non-standard things in the check directory ... OK
+* checking for detritus in the temp directory ... OK
+* DONE
+Status: 4 NOTEs
