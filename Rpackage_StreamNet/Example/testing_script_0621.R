@@ -1,5 +1,5 @@
 setwd("/home/handslab/Desktop/zhong_zheng/test_envir_medium_all_0621")
-library(Rpackage0621)
+library(StreamNet)
 ############test whole pipeline################################
 path_total = "/home/handslab/Desktop/zhong_zheng/test_envir_medium_all_0621/test_envir_whole_pipe/"
 filename_chem = "Water_Chemistry_R_Package.csv"
