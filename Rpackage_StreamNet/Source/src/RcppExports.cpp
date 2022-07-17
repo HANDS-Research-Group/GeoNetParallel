@@ -12,7 +12,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 
 // getDistance
 double getDistance(CharacterMatrix flow_path_nodeIDs, NumericVector stream_path_dist, CharacterMatrix total_edgelist);
-RcppExport SEXP _Rpackage0621_getDistance(SEXP flow_path_nodeIDsSEXP, SEXP stream_path_distSEXP, SEXP total_edgelistSEXP) {
+RcppExport SEXP _StreamNet_getDistance(SEXP flow_path_nodeIDsSEXP, SEXP stream_path_distSEXP, SEXP total_edgelistSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -25,11 +25,11 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_Rpackage0621_getDistance", (DL_FUNC) &_Rpackage0621_getDistance, 3},
+    {"_StreamNet_getDistance", (DL_FUNC) &_StreamNet_getDistance, 3},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_Rpackage0621(DllInfo *dll) {
+RcppExport void R_init_StreamNet(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

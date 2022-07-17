@@ -1,20 +1,18 @@
-#' Some title
-#' @description A description of this function with inline latex \eqn{2^3=8}
-#' test for displayed equations \deqn{\frac{1}{2}\sum_{i=1}^n\log(x+y)}.
-#' We can also use links, tables, lists and Character formattings such as bold and italic.
-#' @param path_total description of this parameter
-#' @param df_analyte_to_append_filepath description of this parameter
-#' @param df_polluter_to_append_file_path description of this parameter
-#' @param upstream_thresh description of this parameter
-#' @param downstream_lower_thresh description of this parameter
-#' @param downstream_upper_thresh description of this parameter
-#' @param num_cores description of this parameter
-#' @param permission description of this parameter
-#'
-#' @return description of the return value
+#' Add new water chemistry data and polluting events at new locations
+#' @description This function can be used to add new water chemistry data and polluting events at new locations and run the statistical inference for all the polluting events. This function can only be used after “whole_pipe” is executed. Execution of this function will overwrite the previously generated output. Therefore, it is advised to preserve a copy of the old outputs in case you need it.
+#' @param path_total This is the same root file path as that of the function “whole_pipe”. The previous output will be overwritten so backup is recommended.
+#' @param df_analyte_to_append_filepath This is the full path to the csv file containing new water chemistry data for the given stream. The file formatting requirement is the same as that of “filename_chem” in “whole_pipe”.
+#' @param df_polluter_to_append_file_path This is the full path to the csv file containing new pollution site data for the given stream. The file formatting requirement is the same as that of “filename_poll” in “whole_pipe”.
+#' @param upstream_thresh The same parameter as that in "whole_pipe".
+#' @param downstream_lower_thresh The same parameter as that in "whole_pipe".
+#' @param downstream_upper_thresh The same parameter as that in "whole_pipe".
+#' @param num_cores The same parameter as that in "whole_pipe".
+#' @param permission The same parameter as that in "whole_pipe".
+#' @return The same return files as those in "whole_pipe".
+#' @note This function assumes “whole_pipe” function has already been run and the outputs generated from it lie in “path_total” folder. Please refer to our \href{https://github.com/HANDS-Research-Group/StreamNet/tree/main/Rpackage_StreamNet}{website} for examples.
 #' @export
 #'
-#' @useDynLib Rpackage0621
+#' @useDynLib StreamNet
 #' @importFrom Rcpp sourceCpp
 #' @importFrom foreach %do%
 #' @importFrom foreach %dopar%
@@ -25,7 +23,7 @@ add_new_analyte_polluter <- function(path_total, df_analyte_to_append_filepath, 
                                      downstream_upper_thresh = 50,
                                      num_cores = 1, permission = "no") {
   if (!(permission == "yes")){
-    print("You need to explicit set this variable to make sure that you know what will happen.")
+    print("You need to explicit set the variable permission to make sure that you know what will happen. Please refer to the help page for function whole_pipe.")
     return (0)
   }
   file_path = path_total

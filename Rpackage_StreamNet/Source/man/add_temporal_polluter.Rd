@@ -2,7 +2,7 @@
 % Please edit documentation in R/add_temporal_polluter.R
 \name{add_temporal_polluter}
 \alias{add_temporal_polluter}
-\title{Some title}
+\title{Add polluting events at existing locations}
 \usage{
 add_temporal_polluter(
   path_total,
@@ -15,25 +15,26 @@ add_temporal_polluter(
 )
 }
 \arguments{
-\item{path_total}{description of this parameter}
+\item{path_total}{This is the same root file path as that of the function “whole_pipe”. The previous output will be overwritten so backup is recommended.}
 
-\item{df_polluter_to_append_file_path}{description of this parameter}
+\item{df_polluter_to_append_file_path}{This is the full path to the csv file containing new pollution site data for the given stream. The file formatting requirement is the same as that of “filename_poll” in “whole_pipe”.}
 
-\item{upstream_thresh}{description of this parameter}
+\item{upstream_thresh}{The same parameter as that in "whole_pipe".}
 
-\item{downstream_lower_thresh}{description of this parameter}
+\item{downstream_lower_thresh}{The same parameter as that in "whole_pipe".}
 
-\item{downstream_upper_thresh}{description of this parameter}
+\item{downstream_upper_thresh}{The same parameter as that in "whole_pipe".}
 
-\item{num_cores}{description of this parameter}
+\item{num_cores}{The same parameter as that in "whole_pipe".}
 
-\item{permission}{description of this parameter}
+\item{permission}{The same parameter as that in "whole_pipe".}
 }
 \value{
-description of the return value
+The same return files as those in "whole_pipe".
 }
 \description{
-A description of this function with inline latex \eqn{2^3=8}
-test for displayed equations \deqn{\frac{1}{2}\sum_{i=1}^n\log(x+y)}.
-We can also use links, tables, lists and Character formattings such as bold and italic.
+This function can be used to add polluting events at existing locations and run the statistical inference for this event. This function can only be used after “whole_pipe” is executed. Execution of this function will overwrite the previously generated output. Therefore, it is advised to preserve a copy of the old outputs in case you need it.
+}
+\note{
+This function assumes “whole_pipe” function has already been run and the outputs generated from it lie in “path_total” folder. Please refer to our \href{https://github.com/HANDS-Research-Group/StreamNet/tree/main/Rpackage_StreamNet}{website} for examples.
 }

@@ -2,6 +2,6 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 getDistance <- function(flow_path_nodeIDs, stream_path_dist, total_edgelist) {
-    .Call('_Rpackage0621_getDistance', PACKAGE = 'Rpackage0621', flow_path_nodeIDs, stream_path_dist, total_edgelist)
+    .Call('_StreamNet_getDistance', PACKAGE = 'StreamNet', flow_path_nodeIDs, stream_path_dist, total_edgelist)
 }
 

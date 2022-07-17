@@ -1,20 +1,26 @@
-#' Some title
-#' @description A description of this function with inline latex \eqn{2^3=8}
-#' test for displayed equations \deqn{\frac{1}{2}\sum_{i=1}^n\log(x+y)}.
-#' We can also use links, tables, lists and Character formattings such as bold and italic.
-#' @param path_total description of this parameter
-#' @param filename_chem description of this parameter
-#' @param filename_poll description of this parameter
-#' @param upstream_thresh description of this parameter
-#' @param downstream_lower_thresh description of this parameter
-#' @param downstream_upper_thresh description of this parameter
-#' @param num_cores description of this parameter
-#' @param permission description of this parameter
+#' The Function for the whole pipeline.
+#' @description This function generates statistical inference of the stream chemistry change between upstream and downstream of all stream locations provided by the user and gives a verdict if the stream is polluted at each location.
+#' @param path_total This is the root file path where the input data is stored and the output would be generated along with intermediate files. Different levels of folders should be separated by "/" and the path should be ended with a "/". This path should contain a folder named "data", which contains files for water chemistry and the polluters and a folder named "Flowline_R_Package" that contains the water flowline files.
+#' @param filename_chem This is the filename of the csv file containing water chemistry data for the given stream. This file should locate at the “data” folder in the directory of “path_total”. The user provided input should be a string of the filename containing “.csv” instead of the full path. The file should contain four columns which are in the order of “Chemical”,” Longitude”,” Latitude” and “Date”. Columns names should be provided but does not need to exactly match the provided names.
+#' @param filename_poll This is the filename of the csv file containing the polluting event location information. This file should locate at the “data” folder in the directory of “path_total”. The user provided input should be a string of the filename containing “.csv” instead of the full path. The file should contain four columns which are in the order of “ID”,” Longitude”,” Latitude” and “Date”. Columns names should be provided but does not need to exactly match the provided names.
+#' @param upstream_thresh Upstream threshold distance in kilometers between provided stream location and upstream samples, within which upstream water samples to be used in the statistical analysis will be defined.
+#' @param downstream_lower_thresh Lower limit for downstream threshold distance in kilometers between provided stream location and downstream water samples, above which downstream water samples to be used in the statistical analysis will be considered. 
+#' @param downstream_upper_thresh Upper limit for downstream threshold distance in kilometers between provided stream location and downstream water samples, below which downstream water samples to be used in the statistical analysis will be considered.
+#' @param num_cores Maximum number of cores to be used to run certain functions in parallel.
+#' @param permission This is a flag about the permission for the function to get the “write” permission for the directory “path_total”. In detail, this function will create sub-directories, write intermediate and final output files in this directory and sub-directory. Any file with the same filename will be overwritten in this process. So, before executing this function, please consider making backups for the directory “path_total” if necessary. Users should set this input to the string “yes” to confirm that they know what will happen and grant the write permission.
 #'
-#' @return description of the return value
+#' @return The outputs are generated as RData files in the “inference” folder in “path_total”. Their names are begun with ‘df_polluter_test_mean_’ and ‘df_polluter_test_median_’ and end with the parameter “downstream_upper_thresh”. The files contain the statistical test results of the stream chemistry upstream and downstream of all the provided stream locations and a verdict whether the stream is polluted or not at each provided stream location.
+#' @examples
+#' #path_total = "test_envir_whole_pipe/"
+#' #filename_chem = "Water_Chemistry_R_Package.csv"
+#' #filename_poll = "Pollution_Site_R_Package.csv"
+#' #num_cores = 26
+#' #permission = "yes"
+#' #try(whole_pipe(path_total, filename_chem, filename_poll, num_cores, permission))
+#' @note Please refer to our \href{https://github.com/HANDS-Research-Group/StreamNet/tree/main/Rpackage_StreamNet}{website} for examples.
 #' @export
 #'
-#' @useDynLib Rpackage0621
+#' @useDynLib StreamNet
 #' @importFrom Rcpp sourceCpp
 #' @importFrom foreach %do%
 #' @importFrom foreach %dopar%
@@ -27,7 +33,7 @@ whole_pipe = function(path_total,
                       downstream_upper_thresh = 50,
                       num_cores=1, permission = "no"){
   if (!(permission == "yes")){
-    print("You need to explicit set this variable to make sure that you know what will happen.")
+    print("You need to explicit set the variable permission to make sure that you know what will happen. Please refer to the help page for function whole_pipe.")
     return (0)
   }
   # upstream_thresh <- 5

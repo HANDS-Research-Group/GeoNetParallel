@@ -1,4 +1,4 @@
-#' @useDynLib Rpackage0621
+#' @useDynLib StreamNet
 #' @importFrom Rcpp sourceCpp
 #' @importFrom foreach %do%
 #' @importFrom foreach %dopar%
