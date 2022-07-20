@@ -1,6 +1,6 @@
-# R package "StreamNet"
+# R package "GeoNetParallel"
 
-Functions in this package enable automatic integration of water quality data and stream flowlines to monitor the stream water quality. It allows the user to analyze stream networks to detect statistically significant changes in stream water quality caused by anthropogenic activities. This package is optimized using RCpp to facilitate the high-throughput monitoring of stream water quality.
+Functions in this package enable automatic integration of water quality data and stream flowlines to monitor the stream water quality. It allows the user to analyze stream networks to detect statistically significant changes in stream water quality caused by anthropogenic activities. This package is optimized using Rcpp to facilitate the high-throughput monitoring of stream water quality.
 
 ## References
 
