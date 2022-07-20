@@ -1,6 +1,6 @@
-# GeoNet 2022
+#  GeoNetParallel
 
-GeoNet analyzes stream networks to detect statistically significant
+GeoNetParallel analyzes stream networks to detect statistically significant
 changes between background and potentially impacted sites.
 
 ![GeoNet](es9b06761_0004.gif)
