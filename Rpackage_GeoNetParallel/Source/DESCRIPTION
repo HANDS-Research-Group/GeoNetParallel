@@ -1,5 +1,6 @@
-Package: StreamNet
-Title: Automatic Integration of Stream Water Quality Data with Stream Network to Monitor Stream Health
+Package: GeoNetParallel
+Title: Automatic Integration of Stream Water Quality Data with Stream
+        Network to Monitor Stream Health
 Version: 0.0.1
 Authors@R: 
     c(person("Rohit", "Patil", , "rrpatil@syr.edu", role = c("aut")),
@@ -8,7 +9,7 @@ Authors@R:
     person("Lingzhou", "Xue", , "lingzhou@psu.edu", role = c("aut")),
     person("Tao", "Wen", , "twen08@syr.edu", role = c("aut", "cre"))
     )
-Description: Functions in this package enable automatic integration of water quality data and stream flowlines to monitor the stream water quality. It allows the user to analyze stream networks to detect statistically significant changes in stream water quality caused by anthropogenic activities. This package is optimized using RCpp to facilitate the high-throughput monitoring of stream water quality.
+Description: Functions in this package enable automatic integration of water quality data and stream flowlines to monitor the stream water quality. It allows the user to analyze stream networks to detect statistically significant changes in stream water quality caused by anthropogenic activities. This package is optimized using Rcpp to facilitate the high-throughput monitoring of stream water quality.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -19,5 +20,13 @@ Imports: data.table, doParallel, dplyr, forcats, foreach, geosphere,
         MASS, network, parallel, purrr, Rcpp, readr, rgdal, sna, sp,
         statnet.common, stats, stringr, tibble, tidyr, utils
 NeedsCompilation: yes
-URL: https://github.com/HANDS-Research-Group/StreamNet/tree/main/Rpackage_StreamNet
-BugReports: https://github.com/HANDS-Research-Group/StreamNet/issues
+URL:
+        https://github.com/HANDS-Research-Group/GeoNetParallel/tree/main/Rpackage_GeoNetParallel
+BugReports: https://github.com/HANDS-Research-Group/GeoNetParallel/issues
+Packaged: 2022-07-17 06:46:52 UTC; 15000
+Author: Rohit Patil [aut],
+  Zhong Zheng [aut],
+  Amal Agarwal [aut],
+  Lingzhou Xue [aut],
+  Tao Wen [aut, cre]
+Maintainer: Tao Wen <twen08@syr.edu>
