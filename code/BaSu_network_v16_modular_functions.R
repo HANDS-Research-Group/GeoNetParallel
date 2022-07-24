@@ -70,7 +70,7 @@ shapefile_pre_processing<-function(shape_obj,output_path){
 
 ########################################################################################################
 ## Writing a function for a two step mapping procedure of all C-PP locations by mapping them to nearest nodes in the base network or dividing the streams and creating new nodes. The 1st main goal is to add these mapped node IDs to the dataframe "df_anpoll_preprocessed" and return that as first argument. The 2nd main goal of this function is to modify all the preprocessed river network files ("df_node_latlong", "total_edgelist_character" and "stream_list") based on this finalized mapping. Inputs are 1) preprocessed dataframe for anpoll "df_anpoll_preprocessed" and 2) directory path where output file should be stored at and outputs 1) df_anpoll_preprocessed with additional column node ID and 2) all outputs same as shapefile_pre_processing but all of them modified
-two_step_anpoll_mapper<-function(df_anpoll_preprocessed,output_path){
+two_step_anpoll_mapper<-function(df_anpoll_preprocessed, output_path, df_node_latlong=NULL, total_edgelist_character=NULL, stream_list=NULL){
   file_path <- output_path
   ## Loading the dataframe "df_node_latlong" from common files
   load(file = paste0(output_path,"common_files/df_node_latlong.RData"))
@@ -231,7 +231,7 @@ two_step_anpoll_mapper<-function(df_anpoll_preprocessed,output_path){
   return(list(df_anpoll_processed,df_node_latlong_modified,total_edgelist_character_modified,stream_list_modified))
 }
 
-two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path){
+two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path, df_node_latlong=NULL, total_edgelist_character=NULL, stream_list=NULL, df_node_latlong_modified=NULL){ 
   file_path <- output_path
   ## Loading the dataframe "df_node_latlong" from common files
   load(file = paste0(output_path,"common_files/df_node_latlong.RData"))
@@ -241,7 +241,7 @@ two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path){
   load(file = paste0(output_path,"common_files/stream_list.RData"))
 
   load(file=paste0(output_path,"common_files_modified/df_node_latlong_modified.RData"))
-  ###################################################
+  # ###################################################
   ## Defining a function to create node mid stream and update everything in the global environment
   mid_stream_node_creator<-function(){
     flag_mid<<-flag_mid+1
@@ -398,7 +398,7 @@ two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path){
   save(stream_list_modified,file=paste0(output_path,"common_files_modified/stream_list_modified.RData"))
   return(list(df_anpoll_processed,df_node_latlong_modified,total_edgelist_character_modified,stream_list_modified))
 }
-two_step_anpoll_mapper_update_polluter<-function(df_anpoll_preprocessed, output_path){
+two_step_anpoll_mapper_update_polluter<-function(df_anpoll_preprocessed, output_path, df_node_latlong=NULL, total_edgelist_character=NULL, stream_list=NULL){
   file_path <- output_path
   ## Loading the dataframe "df_node_latlong" from common files
   load(file = paste0(output_path,"common_files/df_node_latlong.RData"))
@@ -569,7 +569,7 @@ two_step_anpoll_mapper_update_polluter<-function(df_anpoll_preprocessed, output_
 
 ########################################################################################################
 ## Writing a function to calculate the path distances of all streams in the modified common files. Input is directory path where output file should be stored at and output is path distance vector
-stream_path_dist_cal<-function(output_path){
+stream_path_dist_cal<-function(output_path, total_edgelist_character_modified=NULL, stream_list_modified=NULL){
   ## Loading the "total_edgelist_character_modified" from common files modified
   load(file = paste0(output_path,"common_files_modified/total_edgelist_character_modified.RData"))
   ## Loading the "stream_list_modified" from common files modified
@@ -624,7 +624,7 @@ df_polluter_generator<-function(df_polluter_processed,output_path){
 ########################################################################################################
 ########################################################################################################
 ## Writing a function that must be used after analyte and polluter mapping is done. Inputs are total_edgelist_character and directory path where output files should be stored at and gives output as 1) igraph object for whole network "igraph_river_whole" 2) "graph order" giving the vector of indices with decreasing size of most connected clusters 3) "igraph_river_decomposed_list" as a list of igraph objects corresponding to connected subgraphs
-river_net_subset<-function(output_path){
+river_net_subset<-function(output_path, total_edgelist_character_modified=NULL){
   ## Loading the "total_edgelist_character_modified"
   load(file = paste0(output_path,"common_files_modified/total_edgelist_character_modified.RData"))
   ## Creating the igraph object from "total_edgelist_character_modified"
@@ -643,7 +643,7 @@ river_net_subset<-function(output_path){
 ########################################################################################################
 ########################################################################################################
 ## Writing a function which takes inputs as  1) analyte/polluter nodeID aggregated dataframe "df_anpoll_nodeID_aggregated 2) directory path where output files should be stored at and 3) rank_subgraph and gives output as vertex ids corresponding to analyte/polluter for the rank_subgraph
-vertex_IDs_generator<-function(df_anpoll_nodeID_aggregated,output_path,analyte=T,polluter=F,graph_subset=T,rank_subgraph=2){
+vertex_IDs_generator<-function(df_anpoll_nodeID_aggregated,output_path,analyte=T,polluter=F,graph_subset=T,rank_subgraph=2, igraph_river_whole=NULL, graph_order=NULL, igraph_river_decomposed_list=NULL){
   ## Loading 1) igraph object for whole network "igraph_river_whole" 2) "graph order" giving the vector of indices with decreasing size of most connected clusters 3) "igraph_river_decomposed_list" as a list of igraph objects corresponding to connected subgraphs
   load(file = paste0(output_path,"common_files_modified/igraph_river_whole.RData"))
   load(file = paste0(output_path,"common_files_modified/graph_order.RData"))
@@ -710,7 +710,10 @@ vertex_IDs_generator<-function(df_anpoll_nodeID_aggregated,output_path,analyte=T
 ########################################################################################################
 ########################################################################################################
 ## Writing a function to extract a list of projected node IDs in the base river network for each polluter node
-projected_nodeIDs_list_generator<-function(file_path,projected_threshold_dist_km){
+projected_nodeIDs_list_generator<-function(file_path,projected_threshold_dist_km,
+                                            df_anpoll_processed=NULL, df_polluter_processed=NULL,
+                                            df_node_latlong=NULL, total_edgelist_character_modified=NULL,
+                                            total_edgelist_character=NULL, igraph_river_whole=NULL){
   ## Loading the dataframe df_polluter_nodeID_aggregated
   load(file = paste0(file_path,"anpoll_files/df_anpoll_processed.RData"))
   ## Loading the dataframe df_polluter_processed
@@ -790,7 +793,11 @@ projected_nodeIDs_list_generator<-function(file_path,projected_threshold_dist_km
 ########################################################################################################
 ########################################################################################################
 ## Writing a function to extract a list of projected node IDs in the base river network for each polluter node
-projected_nodeIDs_list_generator_new_polluter<-function(file_path,df_polluter_new, projected_threshold_dist_km){
+projected_nodeIDs_list_generator_new_polluter<-function(file_path,df_polluter_new, projected_threshold_dist_km,
+                                                        df_anpoll_processed=NULL, df_polluter_processed=NULL,
+                                                        df_node_latlong=NULL,total_edgelist_character=NULL,
+                                                        total_edgelist_character_modified=NULL,igraph_river_whole=NULL,
+                                                        projected_nodeIDs_list=NULL){
   ## Loading the dataframe df_polluter_nodeID_aggregated
   load(file = paste0(file_path,"anpoll_files/df_anpoll_processed.RData"))
   ## Loading the dataframe df_polluter_processed
@@ -883,7 +890,8 @@ projected_nodeIDs_list_generator_new_polluter<-function(file_path,df_polluter_ne
 #######################################################################################################
 ########################################################################################################
 ## Defining a function to calculate flow distance of all polluter nodes to their projected nodes
-flow_dist_polluter_projected_cal<-function(file_path){
+flow_dist_polluter_projected_cal<-function(file_path, igraph_river_whole=NULL,total_edgelist_character_modified=NULL,
+                                            stream_path_dist_vec=NULL, projected_nodeIDs_list=NULL){
   ## Loading the projected node IDs list
   load(file = paste0(file_path,"common_files_modified/igraph_river_whole.RData"))
   ## Loading the total_edgelist_character_modified  
@@ -892,7 +900,7 @@ flow_dist_polluter_projected_cal<-function(file_path){
   load(file = paste0(file_path,"common_files_modified/stream_path_dist_vec.RData"))
   ## Loading the projected node IDs list
   load(file=paste0(file_path,"polluter_files/projected_nodeIDs_list.RData"))
-  sourceCpp( paste0(file_path, "code/flow_dist_cal_cpp.cpp") , env=environment())
+  Rcpp::sourceCpp( paste0(file_path, "code/flow_dist_cal_cpp.cpp") , env=environment())
   ## Defining a function to calculate between a test node and a current node. The current nodes are usually polluter nodes.
   flow_dist_cal<-function(short_path_vec, test_node_ID, current_node_ID, file_path){
     ## Initializing and loop to fill up the matrix of edges that are formed by the nodeIDs in the path of test and current node ID
@@ -956,7 +964,8 @@ flow_dist_polluter_projected_cal<-function(file_path){
 ########################################################################################################
 ########################################################################################################
 ## Writing a function to create shortest path edgelist and creating the network for analyte-polluter. Inputs are  1) analyte and polluter nodeID aggregated dataframes "df_analyte_nodeID_aggregated" and "df_polluter_nodeID_aggregated" 2) directory path where output files should be stored at. Output shortest path edgelist
-shortest_path_edgelist_creator<-function(graph_subset=T,rank_subgraph=2,file_path){
+shortest_path_edgelist_creator<-function(graph_subset=T,rank_subgraph=2,file_path, analyte_vertex_ids=NULL, polluter_vertex_ids=NULL,
+                                          projected_nodeIDs_vec=NULL, igraph_river_whole=NULL){
   library(igraph)
   ## Loading the analyte and polluter vertex ids
   load(file = paste0(file_path,"analyte_files/analyte_vertex_ids.RData"))
@@ -1004,11 +1013,13 @@ shortest_path_edgelist_creator<-function(graph_subset=T,rank_subgraph=2,file_pat
 }
 
 ## Writing a function (used later in foreach) to create shortest path edgelist and creating the network for analyte-polluter. Inputs are  1) analyte and polluter nodeID aggregated dataframes "df_analyte_nodeID_aggregated" and "df_polluter_nodeID_aggregated" 2) directory path where output files should be stored at. Output shortest path edgelist; This parallelization function has some problems on cluster
-shortest_path_edgelist_creator_parallelized<-function(segment_index,file_path){
+shortest_path_edgelist_creator_parallelized<-function(segment_index,file_path, analyte_vertex_ids=NULL, polluter_vertex_ids=NULL,
+                                          igraph_river_whole=NULL, projected_nodeIDs_vec=NULL){
   library(igraph)
   ## Loading the analyte and polluter vertex ids
   load(file = paste0(file_path,"analyte_files/analyte_vertex_ids.RData"))
   load(file = paste0(file_path,"polluter_files/polluter_vertex_ids.RData"))
+  load(file = paste0(file_path,"polluter_files/projected_nodeIDs_vec.RData"))
   ## Loading 1) igraph object for whole network "igraph_river_whole" 2) "graph order" giving the vector of indices with decreasing size of most connected clusters 3) "igraph_river_decomposed_list" as a list of igraph objects corresponding to connected subgraphs
   load(file = paste0(file_path,"common_files_modified/igraph_river_whole.RData"))
   #load(file = paste0(file_path,"common_files_modified/graph_order.RData"))
@@ -1061,7 +1072,8 @@ shortest_path_edgelist_creator_parallelized<-function(segment_index,file_path){
 }
 
 ## Writing a function (used later in foreach) to create shortest path edgelist and creating the network for analyte-polluter. Inputs are  1) analyte and polluter nodeID aggregated dataframes "df_analyte_nodeID_aggregated" and "df_polluter_nodeID_aggregated" 2) directory path where output files should be stored at. Output shortest path edgelist
-shortest_path_edgelist_creator_parallelized_2<-function(index, n_chunks,file_path){
+shortest_path_edgelist_creator_parallelized_2<-function(index, n_chunks,file_path, analyte_vertex_ids=NULL, polluter_vertex_ids=NULL,
+                                          igraph_river_whole=NULL, projected_nodeIDs_vec=NULL){
   library(igraph)
   ## Loading the analyte and polluter vertex ids
   load(file = paste0(file_path,"analyte_files/analyte_vertex_ids.RData"))
@@ -1109,7 +1121,7 @@ shortest_path_edgelist_creator_parallelized_2<-function(index, n_chunks,file_pat
 ########################################################################################################
 ########################################################################################################
 ## Writing a function to create edgelist and node dataframe for analyte-polluter network using shortest_path_edgelist. Inputs is directory path where output files should be stored at. Outputs are 1) "anpoll_edgelist" and 2) df_node_latlong_anpoll
-anpoll_network_creator <- function(output_path){
+anpoll_network_creator <- function(output_path, shortest_path_anpoll_edgelist=NULL, df_analyte_nodeID_aggregated=NULL, df_polluter_nodeID_aggregated=NULL){
   ## Loading the path edgelist
   load(file = paste0(output_path,"anpoll_files/shortest_path_anpoll_edgelist.RData"))
   ## Loop to create analyte_polluter_edgelist from shortest path edgelist
@@ -1181,7 +1193,7 @@ anpoll_network_creator <- function(output_path){
 # }
 
 ## Defining a wrapper function to calculate flow distance of all polluter nodes in parallel by dividing in chunks. The chunk code was written by Alex so may need another look...
-wrapper_flow_dist_cal_chunk_parallelized <- function(df_polluter,anpoll_edgelist, shortest_path_anpoll_edgelist, total_edgelist_character_modified, from_indicator, to_indicator,chunk_list,n_chunk, file_path){
+wrapper_flow_dist_cal_chunk_parallelized <- function(df_polluter,anpoll_edgelist, shortest_path_anpoll_edgelist, total_edgelist_character_modified, from_indicator, to_indicator,chunk_list,n_chunk, file_path, df_projected_nodeIDs=NULL, stream_path_dist_vec=NULL){
   ## Defining a function to calculate between a test node and a current node. The current nodes are usually polluter nodes.
   flow_dist_cal<-function(anpoll_edgelist, shortest_path_anpoll_edgelist, total_edgelist_character_modified, test_node_ID, current_node_ID, from_indicator, to_indicator, file_path){
     ## Getting the edge row ID
@@ -1236,7 +1248,7 @@ wrapper_flow_dist_cal_chunk_parallelized <- function(df_polluter,anpoll_edgelist
 ########################################################################################################
 
 ## Writing a function to collect all from_node_IDs within the threshold flow distance with respect to given node ID
-from_nodeIDs_crawler<-function(nodeID,upstream_threshold_dist_km,file_path){
+from_nodeIDs_crawler<-function(nodeID,upstream_threshold_dist_km,file_path, total_edgelist_character_modified=NULL, anpoll_edgelist=NULL, flow_dist_from_list=NULL){
   ## Loading the common edgelist total_edgelist_character_modified
   load(file = paste0(file_path,"common_files_modified/total_edgelist_character_modified.RData"))
   ## Loading the analyte-polluter network edgelist "anpoll_edgelist"
@@ -1277,7 +1289,7 @@ from_nodeIDs_crawler<-function(nodeID,upstream_threshold_dist_km,file_path){
 ## and 3) time interval. Outputs are mean, median and length of
 ## observations upstream and downstream within the specified threshold
 ## flow distance and year interval and the corresponding p values
-polluter_test_dist_time <- function(df_polluter, polluter_lon, polluter_lat, polluter_projected_dist_km, upstream_threshold_dist_km, downstream_threshold_lower_dist_km, downstream_threshold_upper_dist_km, date_start, date_end, spill_date, file_path){
+polluter_test_dist_time <- function(df_polluter, polluter_lon, polluter_lat, polluter_projected_dist_km, upstream_threshold_dist_km, downstream_threshold_lower_dist_km, downstream_threshold_upper_dist_km, date_start, date_end, spill_date, file_path, anpoll_edgelist=NULL, projected_nodeIDs_list=NULL, flow_dist_from_list=NULL, flow_dist_to_list=NULL, flow_dist_from_list_projected=NULL, flow_dist_polluter_projected_list=NULL, df_node_latlong_anpoll=NULL, listID_nodeID_matrix=NULL, list_analyte_time=NULL){
   ## Extracting polluter node ID from the dataframe given the polluter latlong
   polluter_node_ID<-unique(df_polluter$nodeID[which((df_polluter$lon_mapped==polluter_lon)&(df_polluter$lat_mapped==polluter_lat))])[1]
   load(file = paste0(file_path, "anpoll_files/anpoll_edgelist.RData"))
@@ -1668,7 +1680,7 @@ fdr_decision_cal <- function(p_val,alpha){
 }
 
 ## Defining a function to genereate final test result dataframe. Inputs are 1) polluter test matrix, 2) significance level alpha (usually set as 0.1) and 3) file_path. Output is the final dataframe with starred p values with or withour fdr control (depending on whether the number of tests is greater than or equal to 15)
-fdr_analysis_wrapper <- function(polluter_test_matrix, alpha, county, file_path){
+fdr_analysis_wrapper <- function(polluter_test_matrix, alpha, county, file_path, df_polluter_processed=NULL){
   
   ## Loading the dataframe df_polluter_processed
   load(file = paste0(file_path,"polluter_files/df_polluter_processed.RData"))
@@ -1828,7 +1840,7 @@ wrapper_flow_dist_cal <- function(index, df_polluter,anpoll_edgelist, shortest_p
 ########################################################################################################
 ## Inference function 
 
-wrapper_polluter_test <- function(index, n_chunks, file_path, j, df_threshold_dist_km){
+wrapper_polluter_test <- function(index, n_chunks, file_path, j, df_threshold_dist_km, df_polluter_processed=NULL){
     ## Loading required libraries
     library(geosphere)
     library(network)
@@ -1903,7 +1915,7 @@ wrapper_polluter_test <- function(index, n_chunks, file_path, j, df_threshold_di
     return(test_result_chunk_list)
   }
   
-  wrapper_polluter_test_update <- function(index, n_chunks, df_polluter_to_append, file_path, j, df_threshold_dist_km){
+  wrapper_polluter_test_update <- function(index, n_chunks, df_polluter_to_append, file_path, j, df_threshold_dist_km, df_polluter_processed_to_append, df_polluter_processed=NUULL){
     ## Loading required libraries
     library(geosphere)
     library(network)

@@ -158,7 +158,7 @@ add_temporal_analyte <- function(df_analyte_to_append_filepath) {
 
 ## Function takes the dataframe with new temporal analyte information
 ## and re-runs the inference for all polluter sites
-add_new_analyte <- function(df_analyte_to_append_filepath) {
+add_new_analyte <- function(df_analyte_to_append_filepath, df_anpoll_processed=NULL, igraph_river_whole=NULL ) {
     
     df_analyte_to_append <- utils::read.csv(df_analyte_to_append_filepath)
 
