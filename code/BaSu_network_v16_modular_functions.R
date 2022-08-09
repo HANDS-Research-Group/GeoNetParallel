@@ -69,6 +69,20 @@ shapefile_pre_processing<-function(shape_obj,output_path){
 }
 
 ########################################################################################################
+# helper function to return and assign multiple values like in python
+list <- structure(NA,class="result")
+"[<-.result" <- function(x,...,value) {
+   args <- as.list(match.call())
+   args <- args[-c(1:2,length(args))]
+   length(value) <- length(args)
+   for(i in seq(along=args)) {
+     a <- args[[i]]
+     if(!missing(a)) eval.parent(substitute(a <- v,list(a=a,v=value[[i]])))
+   }
+   x
+}
+
+########################################################################################################
 ## Writing a function for a two step mapping procedure of all C-PP locations by mapping them to nearest nodes in the base network or dividing the streams and creating new nodes. The 1st main goal is to add these mapped node IDs to the dataframe "df_anpoll_preprocessed" and return that as first argument. The 2nd main goal of this function is to modify all the preprocessed river network files ("df_node_latlong", "total_edgelist_character" and "stream_list") based on this finalized mapping. Inputs are 1) preprocessed dataframe for anpoll "df_anpoll_preprocessed" and 2) directory path where output file should be stored at and outputs 1) df_anpoll_preprocessed with additional column node ID and 2) all outputs same as shapefile_pre_processing but all of them modified
 two_step_anpoll_mapper<-function(df_anpoll_preprocessed, output_path, df_node_latlong=NULL, total_edgelist_character=NULL, stream_list=NULL){
   file_path <- output_path
@@ -80,43 +94,45 @@ two_step_anpoll_mapper<-function(df_anpoll_preprocessed, output_path, df_node_la
   load(file = paste0(output_path,"common_files/stream_list.RData"))
   ###################################################
   ## Defining a function to create node mid stream and update everything in the global environment
-  mid_stream_node_creator<-function(){
-    flag_mid<<-flag_mid+1
+  mid_stream_node_creator<-function(flag_mid, total_edgelist_character_modified, stream_list_modified, df_anpoll_preprocessed){
+    flag_mid<-flag_mid+1
     #print(paste0("flag_mid = ",flag_mid))
     ## Creating new node correspoding to this mapping over stream
     new_node_ID<-as.character(max(as.numeric(df_node_latlong_modified[,1]))+1)
     ## Updating new node counter
-    new_node_counter<<-new_node_counter+1
+    new_node_counter<-new_node_counter+1
     ## Appending the "df_anpoll_preprocessed" with node_ID, lon_mapped and lat_mapped
-    df_anpoll_preprocessed[i,"nodeID"]<<-new_node_ID
-    df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")]<<-as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])
+    df_anpoll_preprocessed[i,"nodeID"]<-new_node_ID
+    df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")]<-as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])
     ## Appending the total character edgelist
-    total_edgelist_character_modified[nrow(total_edgelist_character_modified)+1,]<<-c(total_edgelist_character_modified[stream_ID_anpoll_selected,1],new_node_ID,total_edgelist_character_modified[stream_ID_anpoll_selected,3])
-    total_edgelist_character_modified[nrow(total_edgelist_character_modified)+1,]<<-c(new_node_ID,total_edgelist_character_modified[stream_ID_anpoll_selected,2],total_edgelist_character_modified[stream_ID_anpoll_selected,3])
+    total_edgelist_character_modified[nrow(total_edgelist_character_modified)+1,]<-c(total_edgelist_character_modified[stream_ID_anpoll_selected,1],new_node_ID,total_edgelist_character_modified[stream_ID_anpoll_selected,3])
+    total_edgelist_character_modified[nrow(total_edgelist_character_modified)+1,]<-c(new_node_ID,total_edgelist_character_modified[stream_ID_anpoll_selected,2],total_edgelist_character_modified[stream_ID_anpoll_selected,3])
     ## Deleting the mapped stream from total character edgelist
-    total_edgelist_character_modified<<-total_edgelist_character_modified[-stream_ID_anpoll_selected,]
-    row.names(total_edgelist_character_modified)<<-NULL
+    total_edgelist_character_modified<-total_edgelist_character_modified[-stream_ID_anpoll_selected,]
+    row.names(total_edgelist_character_modified)<-NULL
     ## Storing new node ID latlong in the dataframe df_node_latlong_modified
-    df_node_latlong_modified[nrow(df_node_latlong_modified)+1,1]<<-new_node_ID
-    df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)]<<-as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])
+    df_node_latlong_modified[nrow(df_node_latlong_modified)+1,1]<-new_node_ID
+    df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)]<-as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])
     ## Appending the new stream_list with path information
-    stream_list_modified[[length(stream_list_modified)+1]]<<-as.matrix(rbind(as.matrix(stream_sub_df[stream_selected_row_IDs[1]:stream_selected_row_IDs[min(order(dist_to_points)[c(1,2)])],c(1,2)]),as.numeric(df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)])))
-    row.names(stream_list_modified[[length(stream_list_modified)]])<<-NULL
-    colnames(stream_list_modified[[length(stream_list_modified)]])<<-NULL
-    stream_list_modified[[length(stream_list_modified)+1]]<<-as.matrix(rbind(as.numeric(df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)]),as.matrix(stream_sub_df[stream_selected_row_IDs[max(order(dist_to_points)[c(1,2)])]:stream_selected_row_IDs[length(stream_selected_row_IDs)],c(1,2)])))
-    row.names(stream_list_modified[[length(stream_list_modified)]])<<-NULL
-    colnames(stream_list_modified[[length(stream_list_modified)]])<<-NULL
+    stream_list_modified[[length(stream_list_modified)+1]]<-as.matrix(rbind(as.matrix(stream_sub_df[stream_selected_row_IDs[1]:stream_selected_row_IDs[min(order(dist_to_points)[c(1,2)])],c(1,2)]),as.numeric(df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)])))
+    row.names(stream_list_modified[[length(stream_list_modified)]])<-NULL
+    colnames(stream_list_modified[[length(stream_list_modified)]])<-NULL
+    stream_list_modified[[length(stream_list_modified)+1]]<-as.matrix(rbind(as.numeric(df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)]),as.matrix(stream_sub_df[stream_selected_row_IDs[max(order(dist_to_points)[c(1,2)])]:stream_selected_row_IDs[length(stream_selected_row_IDs)],c(1,2)])))
+    row.names(stream_list_modified[[length(stream_list_modified)]])<-NULL
+    colnames(stream_list_modified[[length(stream_list_modified)]])<-NULL
     ## Deleting the mapped stream path from stream list
-    stream_list_modified[[stream_ID_anpoll_selected]]<<-NULL
+    stream_list_modified[[stream_ID_anpoll_selected]]<-NULL
+    return (list(flag_mid, total_edgelist_character_modified, stream_list_modified, df_anpoll_preprocessed))
   }
   ###################################################
   ## Defining a function to map to node end of the stream and just update df_anpoll_preprocessed in the global environment
-  end_stream_node_mapper<-function(){
+  end_stream_node_mapper<-function(df_anpoll_preprocessed){
     ## Appending the "df_anpoll_preprocessed" with node_ID, lon_mapped and lat_mapped
     column_ID<-if(order(dist_to_points)[1]==1) 1 else 2
-    df_anpoll_preprocessed[i,"nodeID"]<<-as.matrix(total_edgelist_character_modified)[stream_ID_anpoll_selected,column_ID]
+    df_anpoll_preprocessed[i,"nodeID"]<-as.matrix(total_edgelist_character_modified)[stream_ID_anpoll_selected,column_ID]
     temp_ID<-if(order(dist_to_points)[1]==1) 1 else length(dist_to_points)
-    df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")]<<-stream_sub_df[stream_selected_row_IDs[temp_ID],c(1,2)]
+    df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")]<-stream_sub_df[stream_selected_row_IDs[temp_ID],c(1,2)]
+    return(df_anpoll_preprocessed)
   }
   ###################################################
   ## Initializing a dataframe for storing edgelist correspoding to new streams created after mapping
@@ -172,15 +188,17 @@ two_step_anpoll_mapper<-function(df_anpoll_preprocessed, output_path, df_node_la
         coincide_condition<-prod((as.numeric(stream_sub_df[stream_selected_row_IDs[1],c(1,2)])==as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])))
         if(!is.nan(angle_CPP_1_2)){
           if((angle_CPP_1_2>=90)|(coincide_condition)){
-            end_stream_node_mapper( )
+            df_anpoll_preprocessed <- end_stream_node_mapper( df_anpoll_preprocessed )
           }else{
-            mid_stream_node_creator()
+            list[flag_mid, total_edgelist_character_modified, stream_list_modified, df_anpoll_preprocessed] <-  mid_stream_node_creator(flag_mid, total_edgelist_character_modified, 
+                                                                                                                                        stream_list_modified, df_anpoll_preprocessed)
           }
         }else{
           if(coincide_condition){
-            end_stream_node_mapper( )
+            df_anpoll_preprocessed <- end_stream_node_mapper( df_anpoll_preprocessed )
           }else{
-            mid_stream_node_creator()
+            list[flag_mid, total_edgelist_character_modified, stream_list_modified, df_anpoll_preprocessed] <-  mid_stream_node_creator(flag_mid, total_edgelist_character_modified, 
+                                                                                                                                        stream_list_modified, df_anpoll_preprocessed)
           }
         }
       }else if(order(dist_to_points)[1]==length(dist_to_points)){
@@ -189,20 +207,23 @@ two_step_anpoll_mapper<-function(df_anpoll_preprocessed, output_path, df_node_la
         coincide_condition<-prod((as.numeric(stream_sub_df[stream_selected_row_IDs[length(stream_selected_row_IDs)],c(1,2)])==as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])))
         if(!is.nan(angle_CPP_end_1_2)){
           if((angle_CPP_end_1_2>=90)|(coincide_condition)){
-            end_stream_node_mapper( )
+            df_anpoll_preprocessed <- end_stream_node_mapper( df_anpoll_preprocessed )
           }else{
-            mid_stream_node_creator()
+            list[flag_mid, total_edgelist_character_modified, stream_list_modified, df_anpoll_preprocessed] <-  mid_stream_node_creator(flag_mid, total_edgelist_character_modified, 
+                                                                                                                                        stream_list_modified, df_anpoll_preprocessed)
           }
         }else{
           if(coincide_condition){
-            end_stream_node_mapper( )
+            df_anpoll_preprocessed <- end_stream_node_mapper( df_anpoll_preprocessed )
           }else{
-            mid_stream_node_creator()
+            list[flag_mid, total_edgelist_character_modified, stream_list_modified, df_anpoll_preprocessed] <-  mid_stream_node_creator(flag_mid, total_edgelist_character_modified, 
+                                                                                                                                        stream_list_modified, df_anpoll_preprocessed)
           }
         }
       }
     }else{
-      mid_stream_node_creator()
+      list[flag_mid, total_edgelist_character_modified, stream_list_modified, df_anpoll_preprocessed] <-  mid_stream_node_creator(flag_mid, total_edgelist_character_modified, 
+                                                                                                                                        stream_list_modified, df_anpoll_preprocessed)
     }
     ##%>%addCircleMarkers(lng = dist_to_stream[,2],lat = dist_to_stream[,3], radius = 4,color = "yellow")
     if(df_anpoll_preprocessed$lat_mapped[i]>90) { df_anpoll_preprocessed$lat_mapped[i] = 90}
@@ -243,43 +264,45 @@ two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path, df_
   load(file=paste0(output_path,"common_files_modified/df_node_latlong_modified.RData"))
   # ###################################################
   ## Defining a function to create node mid stream and update everything in the global environment
-  mid_stream_node_creator<-function(){
-    flag_mid<<-flag_mid+1
+  mid_stream_node_creator<-function(flag_mid, total_edgelist_character_modified, stream_list_modified, df_anpoll_preprocessed){
+    flag_mid<-flag_mid+1
     #print(paste0("flag_mid = ",flag_mid))
     ## Creating new node correspoding to this mapping over stream
     new_node_ID<-as.character(max(as.numeric(df_node_latlong_modified[,1]))+1)
     ## Updating new node counter
-    new_node_counter<<-new_node_counter+1
+    new_node_counter<-new_node_counter+1
     ## Appending the "df_anpoll_preprocessed" with node_ID, lon_mapped and lat_mapped
-    df_anpoll_preprocessed[i,"nodeID"]<<-new_node_ID
-    df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")]<<-as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])
+    df_anpoll_preprocessed[i,"nodeID"]<-new_node_ID
+    df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")]<-as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])
     ## Appending the total character edgelist
-    total_edgelist_character_modified[nrow(total_edgelist_character_modified)+1,]<<-c(total_edgelist_character_modified[stream_ID_anpoll_selected,1],new_node_ID,total_edgelist_character_modified[stream_ID_anpoll_selected,3])
-    total_edgelist_character_modified[nrow(total_edgelist_character_modified)+1,]<<-c(new_node_ID,total_edgelist_character_modified[stream_ID_anpoll_selected,2],total_edgelist_character_modified[stream_ID_anpoll_selected,3])
+    total_edgelist_character_modified[nrow(total_edgelist_character_modified)+1,]<-c(total_edgelist_character_modified[stream_ID_anpoll_selected,1],new_node_ID,total_edgelist_character_modified[stream_ID_anpoll_selected,3])
+    total_edgelist_character_modified[nrow(total_edgelist_character_modified)+1,]<-c(new_node_ID,total_edgelist_character_modified[stream_ID_anpoll_selected,2],total_edgelist_character_modified[stream_ID_anpoll_selected,3])
     ## Deleting the mapped stream from total character edgelist
-    total_edgelist_character_modified<<-total_edgelist_character_modified[-stream_ID_anpoll_selected,]
-    row.names(total_edgelist_character_modified)<<-NULL
+    total_edgelist_character_modified<-total_edgelist_character_modified[-stream_ID_anpoll_selected,]
+    row.names(total_edgelist_character_modified)<-NULL
     ## Storing new node ID latlong in the dataframe df_node_latlong_modified
-    df_node_latlong_modified[nrow(df_node_latlong_modified)+1,1]<<-new_node_ID
-    df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)]<<-as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])
+    df_node_latlong_modified[nrow(df_node_latlong_modified)+1,1]<-new_node_ID
+    df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)]<-as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])
     ## Appending the new stream_list with path information
-    stream_list_modified[[length(stream_list_modified)+1]]<<-as.matrix(rbind(as.matrix(stream_sub_df[stream_selected_row_IDs[1]:stream_selected_row_IDs[min(order(dist_to_points)[c(1,2)])],c(1,2)]),as.numeric(df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)])))
-    row.names(stream_list_modified[[length(stream_list_modified)]])<<-NULL
-    colnames(stream_list_modified[[length(stream_list_modified)]])<<-NULL
-    stream_list_modified[[length(stream_list_modified)+1]]<<-as.matrix(rbind(as.numeric(df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)]),as.matrix(stream_sub_df[stream_selected_row_IDs[max(order(dist_to_points)[c(1,2)])]:stream_selected_row_IDs[length(stream_selected_row_IDs)],c(1,2)])))
-    row.names(stream_list_modified[[length(stream_list_modified)]])<<-NULL
-    colnames(stream_list_modified[[length(stream_list_modified)]])<<-NULL
+    stream_list_modified[[length(stream_list_modified)+1]]<-as.matrix(rbind(as.matrix(stream_sub_df[stream_selected_row_IDs[1]:stream_selected_row_IDs[min(order(dist_to_points)[c(1,2)])],c(1,2)]),as.numeric(df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)])))
+    row.names(stream_list_modified[[length(stream_list_modified)]])<-NULL
+    colnames(stream_list_modified[[length(stream_list_modified)]])<-NULL
+    stream_list_modified[[length(stream_list_modified)+1]]<-as.matrix(rbind(as.numeric(df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)]),as.matrix(stream_sub_df[stream_selected_row_IDs[max(order(dist_to_points)[c(1,2)])]:stream_selected_row_IDs[length(stream_selected_row_IDs)],c(1,2)])))
+    row.names(stream_list_modified[[length(stream_list_modified)]])<-NULL
+    colnames(stream_list_modified[[length(stream_list_modified)]])<-NULL
     ## Deleting the mapped stream path from stream list
-    stream_list_modified[[stream_ID_anpoll_selected]]<<-NULL
+    stream_list_modified[[stream_ID_anpoll_selected]]<-NULL
+    return(list(flag_mid, total_edgelist_character_modified, stream_list_modified, df_anpoll_preprocessed))
   }
   ###################################################
   ## Defining a function to map to node end of the stream and just update df_anpoll_preprocessed in the global environment
-  end_stream_node_mapper<-function(){
+  end_stream_node_mapper<-function(df_anpoll_preprocessed){
     ## Appending the "df_anpoll_preprocessed" with node_ID, lon_mapped and lat_mapped
     column_ID<-if(order(dist_to_points)[1]==1) 1 else 2
-    df_anpoll_preprocessed[i,"nodeID"]<<-as.matrix(total_edgelist_character_modified)[stream_ID_anpoll_selected,column_ID]
+    df_anpoll_preprocessed[i,"nodeID"]<-as.matrix(total_edgelist_character_modified)[stream_ID_anpoll_selected,column_ID]
     temp_ID<-if(order(dist_to_points)[1]==1) 1 else length(dist_to_points)
-    df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")]<<-stream_sub_df[stream_selected_row_IDs[temp_ID],c(1,2)]
+    df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")]<-stream_sub_df[stream_selected_row_IDs[temp_ID],c(1,2)]
+    return(df_anpoll_preprocessed)
   }
   ###################################################
   ## Initializing a dataframe for storing edgelist correspoding to new streams created after mapping
@@ -332,15 +355,17 @@ two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path, df_
         coincide_condition<-prod((as.numeric(stream_sub_df[stream_selected_row_IDs[1],c(1,2)])==as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])))
         if(!is.nan(angle_CPP_1_2)){
           if((angle_CPP_1_2>=90)|(coincide_condition)){
-            end_stream_node_mapper()
+            df_anpoll_preprocessed <- end_stream_node_mapper(df_anpoll_preprocessed)
           }else{
-            mid_stream_node_creator()
+            list[flag_mid, total_edgelist_character_modified, stream_list_modified, df_anpoll_preprocessed] <- mid_stream_node_creator(flag_mid, total_edgelist_character_modified, 
+                                                                                                                                      stream_list_modified, df_anpoll_preprocessed)
           }
         }else{
           if(coincide_condition){
-            end_stream_node_mapper()
+            df_anpoll_preprocessed <- end_stream_node_mapper(df_anpoll_preprocessed)
           }else{
-            mid_stream_node_creator()
+            list[flag_mid, total_edgelist_character_modified, stream_list_modified, df_anpoll_preprocessed] <- mid_stream_node_creator(flag_mid, total_edgelist_character_modified, 
+                                                                                                                                      stream_list_modified, df_anpoll_preprocessed)
           }
         }
       }else if(order(dist_to_points)[1]==length(dist_to_points)){
@@ -349,20 +374,23 @@ two_step_anpoll_mapper_update<-function(df_anpoll_preprocessed, output_path, df_
         coincide_condition<-prod((as.numeric(stream_sub_df[stream_selected_row_IDs[length(stream_selected_row_IDs)],c(1,2)])==as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])))
         if(!is.nan(angle_CPP_end_1_2)){
           if((angle_CPP_end_1_2>=90)|(coincide_condition)){
-            end_stream_node_mapper()
+            df_anpoll_preprocessed <- end_stream_node_mapper(df_anpoll_preprocessed)
           }else{
-            mid_stream_node_creator()
+            list[flag_mid, total_edgelist_character_modified, stream_list_modified, df_anpoll_preprocessed] <- mid_stream_node_creator(flag_mid, total_edgelist_character_modified, 
+                                                                                                                                      stream_list_modified, df_anpoll_preprocessed)
           }
         }else{
           if(coincide_condition){
-            end_stream_node_mapper()
+            df_anpoll_preprocessed <- end_stream_node_mapper(df_anpoll_preprocessed)
           }else{
-            mid_stream_node_creator()
+            list[flag_mid, total_edgelist_character_modified, stream_list_modified, df_anpoll_preprocessed] <- mid_stream_node_creator(flag_mid, total_edgelist_character_modified, 
+                                                                                                                                      stream_list_modified, df_anpoll_preprocessed)
           }
         }
       }
     }else{
-      mid_stream_node_creator()
+      list[flag_mid, total_edgelist_character_modified, stream_list_modified, df_anpoll_preprocessed] <- mid_stream_node_creator(flag_mid, total_edgelist_character_modified, 
+                                                                                                                                      stream_list_modified, df_anpoll_preprocessed)
     }
     ##%>%addCircleMarkers(lng = dist_to_stream[,2],lat = dist_to_stream[,3], radius = 4,color = "yellow")
     if(df_anpoll_preprocessed$lat_mapped[i]>90) { df_anpoll_preprocessed$lat_mapped[i] = 90}
@@ -410,43 +438,45 @@ two_step_anpoll_mapper_update_polluter<-function(df_anpoll_preprocessed, output_
   load(file=paste0(output_path,"common_files_modified/df_node_latlong_modified.RData"))
   ###################################################
   ## Defining a function to create node mid stream and update everything in the global environment
-  mid_stream_node_creator<-function(){
-    flag_mid<<-flag_mid+1
+  mid_stream_node_creator<-function(flag_mid, total_edgelist_character_modified, stream_list_modified, df_anpoll_preprocessed){
+    flag_mid<-flag_mid+1
     #print(paste0("flag_mid = ",flag_mid))
     ## Creating new node correspoding to this mapping over stream
     new_node_ID<-as.character(max(as.numeric(df_node_latlong_modified[,1]))+1)
     ## Updating new node counter
-    new_node_counter<<-new_node_counter+1
+    new_node_counter<-new_node_counter+1
     ## Appending the "df_anpoll_preprocessed" with node_ID, lon_mapped and lat_mapped
-    df_anpoll_preprocessed[i,"nodeID"]<<-new_node_ID
-    df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")]<<-as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])
+    df_anpoll_preprocessed[i,"nodeID"]<-new_node_ID
+    df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")]<-as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])
     ## Appending the total character edgelist
-    total_edgelist_character_modified[nrow(total_edgelist_character_modified)+1,]<<-c(total_edgelist_character_modified[stream_ID_anpoll_selected,1],new_node_ID,total_edgelist_character_modified[stream_ID_anpoll_selected,3])
-    total_edgelist_character_modified[nrow(total_edgelist_character_modified)+1,]<<-c(new_node_ID,total_edgelist_character_modified[stream_ID_anpoll_selected,2],total_edgelist_character_modified[stream_ID_anpoll_selected,3])
+    total_edgelist_character_modified[nrow(total_edgelist_character_modified)+1,]<-c(total_edgelist_character_modified[stream_ID_anpoll_selected,1],new_node_ID,total_edgelist_character_modified[stream_ID_anpoll_selected,3])
+    total_edgelist_character_modified[nrow(total_edgelist_character_modified)+1,]<-c(new_node_ID,total_edgelist_character_modified[stream_ID_anpoll_selected,2],total_edgelist_character_modified[stream_ID_anpoll_selected,3])
     ## Deleting the mapped stream from total character edgelist
-    total_edgelist_character_modified<<-total_edgelist_character_modified[-stream_ID_anpoll_selected,]
-    row.names(total_edgelist_character_modified)<<-NULL
+    total_edgelist_character_modified<-total_edgelist_character_modified[-stream_ID_anpoll_selected,]
+    row.names(total_edgelist_character_modified)<-NULL
     ## Storing new node ID latlong in the dataframe df_node_latlong_modified
-    df_node_latlong_modified[nrow(df_node_latlong_modified)+1,1]<<-new_node_ID
-    df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)]<<-as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])
+    df_node_latlong_modified[nrow(df_node_latlong_modified)+1,1]<-new_node_ID
+    df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)]<-as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])
     ## Appending the new stream_list with path information
-    stream_list_modified[[length(stream_list_modified)+1]]<<-as.matrix(rbind(as.matrix(stream_sub_df[stream_selected_row_IDs[1]:stream_selected_row_IDs[min(order(dist_to_points)[c(1,2)])],c(1,2)]),as.numeric(df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)])))
-    row.names(stream_list_modified[[length(stream_list_modified)]])<<-NULL
-    colnames(stream_list_modified[[length(stream_list_modified)]])<<-NULL
-    stream_list_modified[[length(stream_list_modified)+1]]<<-as.matrix(rbind(as.numeric(df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)]),as.matrix(stream_sub_df[stream_selected_row_IDs[max(order(dist_to_points)[c(1,2)])]:stream_selected_row_IDs[length(stream_selected_row_IDs)],c(1,2)])))
-    row.names(stream_list_modified[[length(stream_list_modified)]])<<-NULL
-    colnames(stream_list_modified[[length(stream_list_modified)]])<<-NULL
+    stream_list_modified[[length(stream_list_modified)+1]]<-as.matrix(rbind(as.matrix(stream_sub_df[stream_selected_row_IDs[1]:stream_selected_row_IDs[min(order(dist_to_points)[c(1,2)])],c(1,2)]),as.numeric(df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)])))
+    row.names(stream_list_modified[[length(stream_list_modified)]])<-NULL
+    colnames(stream_list_modified[[length(stream_list_modified)]])<-NULL
+    stream_list_modified[[length(stream_list_modified)+1]]<-as.matrix(rbind(as.numeric(df_node_latlong_modified[nrow(df_node_latlong_modified),c(2,3)]),as.matrix(stream_sub_df[stream_selected_row_IDs[max(order(dist_to_points)[c(1,2)])]:stream_selected_row_IDs[length(stream_selected_row_IDs)],c(1,2)])))
+    row.names(stream_list_modified[[length(stream_list_modified)]])<-NULL
+    colnames(stream_list_modified[[length(stream_list_modified)]])<-NULL
     ## Deleting the mapped stream path from stream list
-    stream_list_modified[[stream_ID_anpoll_selected]]<<-NULL
+    stream_list_modified[[stream_ID_anpoll_selected]]<-NULL
+    return(list(flag_mid, total_edgelist_character_modified, stream_list_modified, df_anpoll_preprocessed))
   }
   ###################################################
   ## Defining a function to map to node end of the stream and just update df_anpoll_preprocessed in the global environment
-  end_stream_node_mapper<-function(){
+  end_stream_node_mapper<-function(df_anpoll_preprocessed){
     ## Appending the "df_anpoll_preprocessed" with node_ID, lon_mapped and lat_mapped
     column_ID<-if(order(dist_to_points)[1]==1) 1 else 2
-    df_anpoll_preprocessed[i,"nodeID"]<<-as.matrix(total_edgelist_character_modified)[stream_ID_anpoll_selected,column_ID]
+    df_anpoll_preprocessed[i,"nodeID"]<-as.matrix(total_edgelist_character_modified)[stream_ID_anpoll_selected,column_ID]
     temp_ID<-if(order(dist_to_points)[1]==1) 1 else length(dist_to_points)
-    df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")]<<-stream_sub_df[stream_selected_row_IDs[temp_ID],c(1,2)]
+    df_anpoll_preprocessed[i,c("lon_mapped","lat_mapped")]<-stream_sub_df[stream_selected_row_IDs[temp_ID],c(1,2)]
+    return(df_anpoll_preprocessed)
   }
   ###################################################
   ## Initializing a dataframe for storing edgelist correspoding to new streams created after mapping
@@ -499,15 +529,17 @@ two_step_anpoll_mapper_update_polluter<-function(df_anpoll_preprocessed, output_
         coincide_condition<-prod((as.numeric(stream_sub_df[stream_selected_row_IDs[1],c(1,2)])==as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])))
         if(!is.nan(angle_CPP_1_2)){
           if((angle_CPP_1_2>=90)|(coincide_condition)){
-            end_stream_node_mapper()
+            df_anpoll_preprocessed <- end_stream_node_mapper(df_anpoll_preprocessed)
           }else{
-            mid_stream_node_creator()
+            list[flag_mid, total_edgelist_charachter_modified, stream_list_modified, df_anpoll_preprocessed] <- mid_stream_node_creator(flag_mid, total_edgelist_character_modified, 
+                                                                                                                                  stream_list_modified, df_anpoll_preprocessed)
           }
         }else{
           if(coincide_condition){
-            end_stream_node_mapper()
+            df_anpoll_preprocessed <- end_stream_node_mapper(df_anpoll_preprocessed)
           }else{
-            mid_stream_node_creator()
+            list[flag_mid, total_edgelist_charachter_modified, stream_list_modified, df_anpoll_preprocessed] <- mid_stream_node_creator(flag_mid, total_edgelist_character_modified, 
+                                                                                                                                  stream_list_modified, df_anpoll_preprocessed)
           }
         }
       }else if(order(dist_to_points)[1]==length(dist_to_points)){
@@ -516,20 +548,23 @@ two_step_anpoll_mapper_update_polluter<-function(df_anpoll_preprocessed, output_
         coincide_condition<-prod((as.numeric(stream_sub_df[stream_selected_row_IDs[length(stream_selected_row_IDs)],c(1,2)])==as.numeric(dist_to_stream[which.min(dist_to_stream[,1]),c(2,3)])))
         if(!is.nan(angle_CPP_end_1_2)){
           if((angle_CPP_end_1_2>=90)|(coincide_condition)){
-            end_stream_node_mapper()
+            df_anpoll_preprocessed <- end_stream_node_mapper(df_anpoll_preprocessed)
           }else{
-            mid_stream_node_creator()
+            list[flag_mid, total_edgelist_charachter_modified, stream_list_modified, df_anpoll_preprocessed] <- mid_stream_node_creator(flag_mid, total_edgelist_character_modified, 
+                                                                                                                                  stream_list_modified, df_anpoll_preprocessed)
           }
         }else{
           if(coincide_condition){
-            end_stream_node_mapper()
+            df_anpoll_preprocessed <- end_stream_node_mapper(df_anpoll_preprocessed)
           }else{
-            mid_stream_node_creator()
+            list[flag_mid, total_edgelist_charachter_modified, stream_list_modified, df_anpoll_preprocessed] <- mid_stream_node_creator(flag_mid, total_edgelist_character_modified, 
+                                                                                                                                  stream_list_modified, df_anpoll_preprocessed)
           }
         }
       }
     }else{
-      mid_stream_node_creator()
+       list[flag_mid, total_edgelist_charachter_modified, stream_list_modified, df_anpoll_preprocessed] <- mid_stream_node_creator(flag_mid, total_edgelist_character_modified, 
+                                                                                                                                  stream_list_modified, df_anpoll_preprocessed)
     }
     ##%>%addCircleMarkers(lng = dist_to_stream[,2],lat = dist_to_stream[,3], radius = 4,color = "yellow")
     if(df_anpoll_preprocessed$lat_mapped[i]>90) { df_anpoll_preprocessed$lat_mapped[i] = 90}
