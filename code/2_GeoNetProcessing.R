@@ -34,7 +34,8 @@ shapefile_pre_processing_list <- shapefile_pre_processing(shape_obj = shape,outp
 
 ###############################################################################################
 ## Loading the preprocessed analyte dataframe
-specCond <- utils::read.csv(file = paste0(file_path, 'data/Water_Chemistry_R_Package.csv'))
+specCond_file <- 'Cl_data.csv'
+specCond <- utils::read.csv(file = paste0(file_path, 'data/', specCond_file))
 df_analyte_preprocessed = specCond[,c(1, 2, 3, 4)]
 names(df_analyte_preprocessed) <- c("conc", "lon", "lat", "date")
 
@@ -51,7 +52,10 @@ head(df_analyte_preprocessed)
 
 ###################################################
 ## Preprocessing the polluter dataframe
-df_polluter_raw<-utils::read.csv(file = paste0(file_path,"data/Pollution_Site_R_Package_missing_temporal.csv"))
+
+polluter_file <- 'Spill_data.csv'
+
+df_polluter_raw<-utils::read.csv(file = paste0(file_path,"data/", polluter_file ))
 str(df_polluter_raw)
 names(df_polluter_raw) <- c("county", "lon", "lat", "date")
 ## Preprocessing the analyte dataframe

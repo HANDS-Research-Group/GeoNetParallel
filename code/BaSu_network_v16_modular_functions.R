@@ -687,7 +687,7 @@ vertex_IDs_generator<-function(df_anpoll_nodeID_aggregated,output_path,analyte=T
   ## checking how many observation node IDs overlap over overall nodeIDs in whole graph
   sum(igraph::V(igraph_river_whole)$name%in%df_anpoll_nodeID_aggregated$nodeID)
   ## checking how many observation node IDs overlap over overall nodeIDs in rank_subgraph biggest subgraph
-  sum(igraph::V(igraph_river_decomposed_list[[graph_order[rank_subgraph]]])$name%in%df_anpoll_nodeID_aggregated$nodeID)
+  #sum(igraph::V(igraph_river_decomposed_list[[graph_order[rank_subgraph]]])$name%in%df_anpoll_nodeID_aggregated$nodeID)
   if(graph_subset){
     if(analyte){
       ## setting vertex attributes as observation being true/false
